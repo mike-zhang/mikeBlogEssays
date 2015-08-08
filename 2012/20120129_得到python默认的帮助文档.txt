@@ -1,0 +1,51 @@
+得到python默认的帮助文档
+
+python的help文档很好，就是有时候help一下给出好几页来，甚至有些帮助根本就看不到了(我想应该有其他方法可以解决，只是我不想去查了)，因为这个可以通过一个很简单的python脚本搞定。
+这里举例为证，比如我想得到Tkinter的帮助文档，在交互模式下，我可以这样输入：
+
+>>> import Tkinter
+>>> help(Tkinter)
+
+按下回车则会看到壮观的刷屏效果……当你滚动鼠标看比较靠前的帮助文档时会发现找不到。
+这显然不是我需要的。
+或许是我不应该这么输入，我这样的输入导致过量的输出。
+可事实是我真的很需要关于Tkinter的全部文档，怎么办？
+我想可以这样，具体如下：
+
+文件：getPythonHelp2.py :
+代码：
+
+#!/usr/bin/python
+import Tkinter
+help(Tkinter)
+
+使用：
+python getPythonHelp2.py > 1.txt
+直接输出重定向到文件，存盘查看很方便，哈哈……
+
+其实还有个更懒的做法，这里只给出个demo：
+
+#!/usr/bin/python
+'''
+   File      : getPythonHelp.py
+   Author    : Mike
+   E-Mail    : Mike_Zhang@live.com
+'''
+import Tkinter
+import sys
+
+tmp = sys.stdout
+fp = open("1.txt","w") 
+sys.stdout = fp # redirect stdout
+help(Tkinter)
+sys.stdout = tmp # recover stdout
+fp.close()
+
+这个用到我之前的一篇文章(http://www.cnblogs.com/MikeZhang/archive/2012/01/19/ioRedirect.html)中提到的程序内部IO重定向实现的
+其实原理都差不多
+
+好，就这些了，希望对你有帮助。
+
+
+
+

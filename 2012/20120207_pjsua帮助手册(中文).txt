@@ -1,0 +1,287 @@
+原文地址 : http://www.pjsip.org/pjsua.htm
+
+介绍
+
+PJSUA是一个开源的命令行SIP用户代理（软电话），用PJSIP协议，PJNATH，和PJMEDIA实现。 它虽然只有很简单的命令行界面，但是功能齐全。
+
+SIP功能：
+	多个id（帐户注册）；
+	多个呼叫；
+	支持IPv6（在1.2版本中添加）；
+	PRACK（100rel，RFC 3262）；
+	UPDATE (RFC 3311)；
+	OPTIONS；
+	呼叫保持；
+	呼叫转移；
+	简单的PIDF和XPIDF的支持（订阅/通知，RFC 3265，3856，3863）；
+	自定义存在状态文本（RPID，RFC 4480）；
+	支持PUBLISH（RFC 3903）；
+	即时消息（消息）和消息组成指示（RFC 3428，3994）；
+	支持UDP，TCP和TLS传输；
+	SIP服务器的DNS SRV（RFC 3263）；
+	带INFO的DTMF（RFC 2976）；
+	STUN（RFC 3489bis);
+	AKA认证（开发中，RFC 3310，4169）。
+
+媒体功能：
+	多个并发调用；
+	会议；
+	支持Speex，iLBC，GSM，G711，G722，和L16编解码；
+	宽带和超宽带编解码（Speex）；
+	通过Intel的IPP库支持更多编解码：AMR-WB，AMR-NB，G.722.1（Siren7），G.723.1，G.726，G.728，G.729A；
+	立体声编解码（L16）;
+	WAV文件播放，流媒体和录制;
+	支持RTCP协议；
+	通话质量监测；
+	RFC 2833；
+	自动应答，自动播放文件，自动循环RTP；
+	产生声音；
+	AEC（Accoustic回声消除）；
+	自适应抖动缓冲器；
+	自适应静音检测；
+	PLC（包丢失隐藏）；
+	丢包模拟；
+	每个RTP包中包含多个帧；
+	支持SRTP（安全RTP）
+
+NAT功能：
+	ICE（互动式连接建立，最新ICE草案）；
+	STUN（最新的RFC3489双）;
+	TURN（最新草案）;
+	rport;
+	SIP的TCP和TLS保持活动；
+	自动检测和恢复SIP UDP地址的变更；
+	自动检测ICE媒体传输的变化;
+
+程序使用
+
+用法：
+   PJSUA [选项] [SIP的URL调用]
+
+一般选项：
+   --config-file=file 	读取从文件的配置/参数；
+   --help 		显示此帮助屏幕；
+   --version 		显示版本信息；
+
+日志记录选项：
+	--log-file=fname    日志文件名（默认是stderr）；
+	--log-level=N       设置日志的最大级别为N（0（无）6（跟踪））（默认值= 5）；
+	--app-log-level=N   设置日志的最大水平为stdout显示（默认值= 4）；
+	--color             运用丰富多彩的日志（在Win32默认开启）；
+	--no-color          禁用丰富多彩的日志；
+	--light-bg          使用白底黑字的颜色（默认是黑暗的背景）；
+
+SIP帐户选项：
+	--use-ims           开启和这个账号相关的3GPP/IMS设置；
+	--use-srtp=N        是否使用SRTP?  0:不使用, 1:可选, 2:强制使用 (默认:0)；
+	--srtp-secure=N     SRTP 是否需要安全的SIP? 0:不需要, 1:tls方式, 2:sips (默认:1)；
+	--registrar=url     设置注册服务器的URL；
+	--id=url            设置本地账户的URL
+	--contact=url       选择性的覆盖联系人信息
+	--contact-params=S  给指定的联系URI添加S参数
+	--proxy=url         可选择的访问代理服务器的URL                     
+	--reg-timeout=SEC   注册时间间隔 (default 55)
+	--realm=string      设置域
+	--username=string   设置用户名
+	--password=string   设置密码
+	--publish           发PUBLISH
+	--use-100rel        需要可靠的临时响应(100rel)
+	--auto-update-nat=N n为0或1来启用/禁用SIP遍历后面对称NAT(默认1)
+	--next-cred         添加其他凭据
+
+SIP帐户控制：
+	--next-account      添加更多的账户
+
+传输选项：
+	--ipv6              使用IPv6
+	--local-port=port   端口
+	--ip-addr=IP        ip地址
+	--bound-addr=IP     绑定端口
+	--no-tcp            禁用TCP传输
+	--no-udp            禁用UDP传输
+	--nameserver=NS     域名服务器
+	--outbound=url      设置全局代理服务器的URL，可以指定多次
+	--stun-srv=name     设置STUN服务器主机或域名
+
+TLS选项：
+	--use-tls           启用TLS传输（默认不开启）
+	--tls-ca-file       指定TLS CA文件（默认为无）
+	--tls-cert-file     指定TLS证书文件（默认为无）
+	--tls-privkey-file  指定TLS私钥文件（默认值=无）
+	--tls-password      指定TLS私钥文件密码（默认为无）
+	--tls-verify-server 验证服务器的证书（默认=没有）
+	--tls-verify-client 验证客户端的证书（默认=没有）
+	--tls-neg-timeout   指定超时（默认值无）
+	--tls-srv-name      指定TLS服务器名称为多宿主服务器（可选）
+
+媒体选项：
+	--add-codec=name    手工添加编解码(默认开启所有)
+	--dis-codec=name    禁用某个编解码
+	--clock-rate=N      覆盖会议桥时钟频率
+	--snd-clock-rate=N  覆盖音频设备时钟频率
+	--stereo            音频设备及会议桥开通立体声模式
+	--null-audio        使用NULL音频设备
+	--play-file=file    在会议桥中注册WAV文件
+	--play-tone=FORMAT  向会议桥注册音调，格式是'F1,F2,ON,OFF'，其中F1,F2为频率，
+			ON,OFF=on/off ,可以指定多次。
+	--auto-play         自动播放文件（仅来电）
+	--auto-loop         自动循环传入RTP到传出RTP
+	--auto-conf         自动加入会议
+	--rec-file=file     录音文件(扩展名可以使.wav 或者 .mp3）
+	--auto-rec          自动记录通话
+	--quality=N         指定媒介质量(0-10,默认6)
+	--ptime=MSEC        覆盖编解码器ptime的毫秒的
+	--no-vad            停用VAD方案/沉默探测器（默认启用VAD）
+	--ec-tail=MSEC      设置回波抵消尾长度（默认值256）
+	--ec-opt=OPT        选择回波抵消算法（0 =默认，1 = SPEEX，2 =抑制）
+	--ilbc-mode=MODE    设置iLBC语音编解码器模式（20或30，默认是30）
+	--capture-dev=id    音频捕获的设备ID（默认值= -1）
+	--playback-dev=id   音频播放设备ID（默认值= -1）
+	--capture-lat=N     音频捕获延迟（毫秒,默认值= 100）
+	--playback-lat=N    音频播放延迟（毫秒,默认值= 100）
+	--snd-auto-close=N  闲置N秒后自动关闭音频设备
+					  指定n = -1（默认）禁用此功能。
+					  指定即时关闭不使用时，N = 0。
+	--no-tones          禁用听见声音
+	--jb-max-size       指定最大值抖动缓冲(帧，默认= 1)
+
+媒体传输选项：
+	--use-ice           使用ICE（默认：不使用）
+	--ice-no-host       禁用ICE主机候选（默认:no）
+	--ice-no-rtcp       禁用RTCP组件（默认:no）
+	--rtp-port=N        RTP尝试端口基数(默认4000)
+	--rx-drop-pct=PCT   Drop PCT percent of RX RTP (for pkt lost sim, default: 0)
+	--tx-drop-pct=PCT   Drop PCT percent of TX RTP (for pkt lost sim, default: 0)
+	--use-turn          Enable TURN relay with ICE (default:no)
+	--turn-srv          TURN服务器的域或主机名称
+	--turn-tcp          使用TCP连接到TURN服务器（默认:no）
+	--turn-user         TURN用户名
+	--turn-passwd       TURN密码
+
+好友名单（可以是多个）：
+	--add-buddy url     添加指定的URL到好友列表中
+
+用户代理选项：
+	--auto-answer=code  自动接听来电的应答代码（如200）
+	--max-calls=N       最大并发呼叫数（默认：4，最大：255）
+	--thread-cnt=N      工作线程数目（默认：1）
+	--duration=SEC      设置最大通话时间（默认是：没有限制）
+	--norefersub        转接通话时禁止事件订阅
+	--use-compact-form  最小的SIP消息大小
+	--no-force-lr       允许使用严格路由
+	--accept-redirect=N 指定如何处理呼叫重定向响应（3XX）。
+					   0：拒绝，1：自动（默认），2：询问
+
+
+
+					   
+					   
+启动界面
++=============================================================================+
+|       Call Commands:         |   Buddy, IM & Presence:  |     Account:      |
+|                              |                          |                   |
+|  m  Make new call            | +b  Add new buddy       .| +a  Add new accnt |
+|  M  Make multiple calls      | -b  Delete buddy         | -a  Delete accnt. |
+|  a  Answer call              |  i  Send IM              | !a  Modify accnt. |
+|  h  Hangup call  (ha=all)    |  s  Subscribe presence   | rr  (Re-)register |
+|  H  Hold call                |  u  Unsubscribe presence | ru  Unregister    |
+|  v  re-inVite (release hold) |  t  ToGgle Online status |  >  Cycle next ac.|
+|  U  send UPDATE              |  T  Set online status    |  <  Cycle prev ac.|
+| ],[ Select next/prev call    +--------------------------+-------------------+
+|  x  Xfer call                |      Media Commands:     |  Status & Config: |
+|  X  Xfer with Replaces       |                          |                   |
+|  #  Send RFC 2833 DTMF       | cl  List ports           |  d  Dump status   |
+|  *  Send DTMF with INFO      | cc  Connect port         | dd  Dump detailed |
+| dq  Dump curr. call quality  | cd  Disconnect port      | dc  Dump config   |
+|                              |  V  Adjust audio Volume  |  f  Save config   |
+|  S  Send arbitrary REQUEST   | Cp  Codec priorities     |  f  Save config   |
++------------------------------+--------------------------+-------------------+
+|  q  QUIT   L  ReLoad   sleep MS   echo [0|1|txt]     n: detect NAT type     |
++=============================================================================+
+You have 0 active call
+>>>  
+
+呼叫命令
+m	产生一个呼叫
+M	向同一个地址产生多个呼叫
+a	响应呼叫（发送100-699）
+h	挂断当前呼叫(ha为挂断所有)
+H	呼叫保持
+v	恢复通话（解除呼叫保持）
+U	发送UPDATE请求
+],[ 呼叫翻页（前一个/下一个）
+x	呼叫转移
+X	呼叫替换
+#	发送DTMF（RFC238）
+*	发送DTMF（SIP INFO）
+dq	显示当前通话质量
+S	给远端主机发送任意请求
+
+即时通讯
++b	添加好友
+-b  删除好友
+i  	发送即时消息
+s	订阅（好友）当前状态
+u	取消订阅（好友）当前状态
+t  	在线状态切换
+T 	设置在线状态
+
+媒体命令
+cl  列出端口
+cc  连接端口
+cd  断开端口
+V  	调节音量
+Cp  优先编码器
+
+帐户
++a  添加
+-a  删除
+!a  修改
+rr  重新注册
+ru  反注册
+>  	下一个（循环）
+<  	前一个（循环）
+
+状态和设置
+d	显示状态
+dd	显示状态详情
+dc	显示配置
+f	保存配置
+
+其它命令：
+q				退出
+L				重新加载
+sleep MS		暂停键盘输入(毫秒)
+echo [0|1|TXT]	控制echo命令(0:禁用，1：启用，TXT ：回显)
+n				探测NAT网络
+
+PJSUA的使用
+
+1、简单点对点
+	启动： $ ./pjsua
+	呼叫：$ ./pjsua sip:192.168.0.10
+	默认端口：5060
+2、向服务器注册
+单帐户注册：
+$ ./pjsua --id sip:alice@example.com --registrar sip:example.com \
+          --realm * --username alice --password secret
+多帐户注册：
+$ ./pjsua --id sip:bob@provider1.com --registrar sip:provider1.com \
+          --realm provider.1.com --username bob --password secret \
+          --next-account \
+          --id sip:bob@provider2.com --registrar sip:provider2.com \
+          --realm provider2.com --username bob --password secret
+3、自动应答并播放wav文件：
+$ pjsua --play-file PROMPT.WAV --auto-answer 200 --auto-play --auto-loop \
+        --max-calls 100
+4、从文件加载：
+
+文件（alice.cfg）内容：
+# This is a comment in the config file.
+--id sip:alice@example.com
+--registrar sip:example.com
+--realm *
+--username alice
+--password secret
+使用：
+$ ./pjsua --config-file alice.cfg

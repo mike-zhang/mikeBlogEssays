@@ -1,0 +1,44 @@
+VC6编译pjproject-1.12并生成python的pjsua
+
+一、环境
+1、Windows XP 
+2、PlatformSDK ： 5.2.3790.2075.51.PlatformSDK_Svr2003R2_rtm.img
+3、Directx ： DXSDK_Jun10.exe
+4、openssl ： openssl-0.9.8e
+5、Python ： python2.7
+加入VC目录
+二、编译
+设置pjsua工程为活动工程并编译。
+若出现以下错误：
+"os.obj : error LNK2001: unresolved external symbol _pj_get_sys_info"
+则将pjlib\src\pj下的os_info.c加入pjlib工程，注释以下几行（218行，没出错则不用注释）：
+	case PROCESSOR_ARCHITECTURE_AMD64:
+	    si.machine = pj_str("x86_64");
+	    break;
+重新编译，在pjsip-apps\bin下生成pjsua_vc6.exe
+三、pjsua_vc6.exe的使用
+建立文件pj.txt,内容如下：
+--id sip:1001@192.168.1.100
+--registrar sip:192.168.1.100
+--realm *
+--username 1001
+--password 1001
+进入目录，执行如下命令：
+pj.exe --config-file pj.txt
+或者bat文件写入以下指令：
+pj.exe --config-file pj.txt
+注册成功后，输入m并回车，输入要呼叫号码的uri（比如：sip:1002@192.168.1.100）进行呼叫。
+
+四、python2.7的pjsua安装：
+1、进入pjsip-apps\build 目录，打开pjsip-apps.dsw；
+2、选择python_pjsua并编译；
+3、会在pjsip-apps\lib目录下生成_pjsua.pyd
+
+方法一：
+打开命令行，转入pjsip-apps\src\python目录，执行"python setup-vc.py install"命令即可安装；
+方法二：
+在pjsip-apps\lib目录下找到_pjsua.pyd
+在pjsip-apps\src\python目录下找到pjsua.py
+将_pjsua.pyd、pjsua.py拷贝到C:\Python27\Lib\site-packages目录(参考目录)即可
+
+tips：以上是在XP下VC6编译的，将_pjsua.pyd、pjsua.py拷贝到Win7下Python27\Lib\site-packages目录(参考目录)也可以使用。

@@ -1,0 +1,74 @@
+C函数适配器
+
+普通变量可以通过指针进行访问，用起来很方便，现在我有个想法，就是玩函数也要玩的这么炫，我想给它写个适配器……
+
+这里我主要是用可变参数和函数指针来实现，有两个测试代码片段：test1()和test2()。其中test1用的是可变参数的函数指针，test2用的是宏实现的函数适配器。
+
+代码如下：
+
+/*
+File      : adapter.c
+Author    : Mike
+E-Mail    : Mike_Zhang@live.com
+*/
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+#define adapter(f,...) f(__VA_ARGS__)
+typedef int(*fun)(int a,...);
+
+int fun1(int a,int b)
+{
+	return a+b;	
+}
+
+int fun2(int a,char *str)
+{
+	return a+strlen(str);	
+}
+
+int fun3(int a,char *str,long l)
+{
+	return a+strlen(str)+l;	
+}
+
+void test1()
+{
+	int a = 10,b = 2;
+	fun p;
+
+	printf("test1\n");
+
+	p = (fun)fun1;
+	printf("%d\n",p(a,b));
+	p = (fun)fun2;
+	printf("%d\n",p(a,(char*)"just a test"));	
+	p = (fun)fun3;
+	printf("%d\n",p(a,(char*)"just a test",1));	
+}
+
+void test2()
+{
+	int a = 10,b = 2;
+	fun p;
+
+	printf("test2\n");
+
+	p = (fun)fun1;
+	printf("%d\n",adapter(p,a,b));
+	p = (fun)fun2;
+	printf("%d\n",adapter(p,a,"just a test"));
+	p = (fun)fun3;
+	printf("%d\n",adapter(p,a,"just a test",1));
+}
+
+int main()
+{
+	test1();
+	test2();
+	return 0;
+}
+
+tips : gcc和VS2010都行，VC6跑不过，用的时候注意点。

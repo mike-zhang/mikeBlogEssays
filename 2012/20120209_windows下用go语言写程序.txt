@@ -1,0 +1,70 @@
+windows下用go语言写程序
+
+linux下，google的go语言安装起来很方便，用起来也很爽，几行代码就可以实现很强大的功能。
+现在的问题是我想在windows下玩……
+其实windows下也不麻烦，具体见下文。
+
+一、安装go语言：
+1、安装MinGW（https://bitbucket.org/jpoirier/go_mingw/downloads）；
+2、下载源码
+	进入C:\MinGW,双击mintty开启终端窗口；
+	执行"hg clone -u release https://go.googlecode.com/hg/ /c/go"下载源码；
+3、编译源码
+	执行"cd /c/go/src"进入src目录，执行"./all.bash"进行编译；
+4、设置环境变量
+	编译完成后，会在C:/go/bin/下生成二进制文件，在PATH中加入"C:\go\bin;"；
+
+二、写go代码：
+文件：test.go
+代码如下：
+
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Test")
+}
+
+三、生成可执行文件（以我机器为例，具体可参考官网文档）：
+　　编译：8g -o test.8 test.go
+　　链接：8l -o test.exe test.8
+　　执行test.exe,会输出：
+Test
+
+四、批量生成可执行文件
+　　如果写的测试代码多的话，每一次都要输入两遍命令，感觉很不方便。
+所以我决定写一个脚本，让它自动遍历当前目录下所有以".go"结尾 的文件，对文件进行编译生成目标文件、链接生成可执行文件，然后删除目标文件。这个脚本是仿照之前的文章（http://www.cnblogs.com/MikeZhang/archive/2012/01/17/2324567.html）中生成Makefile的原理写的，功能有限，适合写测试代码的时候用。
+    这里是代码：
+
+
+'''
+      File      : compileGo.py
+      Author    : Mike
+      E-Mail    : Mike_Zhang@live.com
+'''
+import os
+
+srcSuffix = '.go' 
+dstSuffix = '.exe'
+cmdCompile = "8g" 
+cmdLink = "8l"
+
+fList = []
+for dirPath,dirNames,fileNames in os.walk('.'):
+	for file in fileNames:
+		name,extension = os.path.splitext(file)
+		if extension == srcSuffix : 
+			fList.append(name)	
+			tmpName = name + '.8' # temp file
+			strCompile = '%s -o %s %s ' % (cmdCompile,tmpName,file)
+			print strCompile
+			os.popen(strCompile) # compile 
+			strLink = '%s -o %s %s' % (cmdLink,name+dstSuffix,tmpName)
+			print strLink
+			os.popen(strLink)	# link			
+			os.remove(tmpName)  # remove temp file
+	break # only search the current directory
+
+
+好，就这些了，希望对你有帮助。

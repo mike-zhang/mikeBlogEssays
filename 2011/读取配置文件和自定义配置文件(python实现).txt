@@ -1,0 +1,125 @@
+用python读取配置文件比较方便，比如下面一个配置文件：
+
+0.ini文件：
+－－－－－－－－－－－－－－－文件开始－－－－－－－－－－－－－－－－
+[global]
+ip = 192.168.1.100 ;ip地址
+port = 1234
+MAC = 0x414243444546;mac
+－－－－－－－－－－－－－－－文件结束－－－－－－－－－－－－－－－－
+要从中读取ip地址我们可以用如下代码：
+
+#! /usr/bin/python
+#-*- coding: utf-8 -*-
+import ConfigParser
+
+config = ConfigParser.ConfigParser()
+config.readfp(open(raw_input("Input file name : "),"rb"))
+
+print config.get("global","ip")
+
+运行结果：
+>>> 
+Input file name : 0.ini
+192.168.1.100
+
+如果把最后一行换成：print config.get("global","MAC")
+运行结果：
+>>> 
+Input file name : 0.ini
+0x414243444546;mac
+
+然而读取的数据不是我预期的（主要是ini文件写法有误），再看下面我自己定义的配置文件：
+
+1.ini文件：
+－－－－－－－－－－－－－－－文件开始－－－－－－－－－－－－－－－－
+
+# 配置文件
+
+<part1>  
+[global] 	#全局配置参数
+	ip = 192.168.1.100
+	port = 1234	
+	MAC = 0x414243444546# MAC地址
+
+
+<part2>  
+[global] 	#全局配置参数
+	ip = 192.168.1.101
+	port = 1234	
+	MAC = 0x414243444547 	# MAC地址
+
+－－－－－－－－－－－－－－－文件结束－－－－－－－－－－－－－－－－
+
+对于扩展的配置文件格式，上述代码不能解析。默认的配置有时候局限太大，用起来不太方便。
+我们可以借助python的dict数据结构完成配置文件的解析，使用起来也很方便。
+下面是个示例，可以读取上述扩展的配置文件。
+
+读取代码示例：
+
+#! /usr/bin/python
+#-*- coding: utf-8 -*-  
+
+partLable = ("<",">")
+sectionLable = ("[","]")
+endlineLable = "\r\n" # windows下的行标志
+#endlineLable = "\n"   # linux下的行标志
+equalLable = "=" # 赋值标志
+noteLable = '#' # 注释标志
+
+# 得到总配置的map
+def getPlatformMap(strtmp,lable1 = partLable,lable2 = sectionLable):
+    tmp = strtmp.split(lable1[0])
+    tmp = [elem for elem in tmp if len(elem) > 1]
+    tmp = [elem for elem in tmp if elem.rfind(lable1[1]) > 0]
+    platdict = {}
+    for elem in tmp:
+        key = elem[0:elem.find(lable1[1]):]
+        value = elem[elem.find(lable2[0])::]
+        platdict[key] = value
+    return platdict
+
+# 得到各部分的map
+def getSectionMap(strtmp,lable1 = sectionLable):
+    tmp = strtmp.split(lable1[0])
+    tmp = [elem for elem in tmp if len(elem) > 1]
+    tmp = [elem for elem in tmp if elem.rfind(lable1[1]) > 0]
+    sectionDict = {}
+    for elem in tmp:
+        key = elem[0:elem.find(lable1[1]):]
+        value = elem[elem.find(endlineLable)+len(endlineLable)::]
+        sectionDict[key] = value
+    return sectionDict
+
+# 获取具体配置值
+def getValueMap(strtmp):
+    tmp = strtmp.split(endlineLable)
+    tmp = [elem for elem in tmp if len(elem) > 1]
+    valueDict = {}
+    for elem in tmp:
+        if elem.find(noteLable) > 0: # 如果有注释则去掉注释
+            elem = elem[0:elem.find(noteLable):]
+        elem = ''.join(elem.split()) # 去掉空白字符
+        key = elem[0:elem.find(equalLable):]
+        value = elem[elem.find(equalLable)+len(equalLable)::]
+        valueDict[key] = value
+    return valueDict
+
+f = open(raw_input("Input file name : "),"rb")
+strFileContent = f.read()
+f.close()
+vardict = {}
+
+var1 = getPlatformMap(strFileContent)
+
+for k,v in var1.items():
+    var2 = getSectionMap(v)
+    dict3 = {}
+    for k2,v2 in var2.items():
+        var3 = getValueMap(v2)
+        dict3[k2] = var3
+    vardict[k] = dict3
+
+print vardict["part2"]["global"]["ip"]
+
+这里只提供一种思路,验证其可行性，当然也可以用C++等其它语言进行改写以满足需求。

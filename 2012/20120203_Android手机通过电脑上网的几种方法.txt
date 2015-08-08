@@ -1,0 +1,41 @@
+智能手机通过电脑上网的几种方法
+
+本文定位：没有wifi，想让手机通过电脑的有线连接上网。
+
+android手机可以通过wifi上网，这个很好。可当没有wifi的时候怎么上啊，3G--->流量受限，看视频很不划算！
+我这里总结了几种方法供大家参考。
+
+方法一：usb连接线,手机有线上网
+我这里说下大致流程，具体可见http://www.angeeks.com/thread-41906-1-1.html
+1、将手机通过usb线连接到电脑，勾选“设置 -> 无线和网络 -> 绑定与便携热点 -> USB绑定”选项，电脑上会出现虚拟网卡，
+为便于分辨，给虚拟网卡改个名字叫:android ；
+2、共享电脑网络至android网卡；
+3、打开超级终端，su变身超级用户，查询手机ip
+# busybox ifconfig 
+手机ip：192.168.43.100（每个人不一样）
+4、把电脑上android网卡的ip改为192.168.43.1；
+5、添加默认网关
+#busybox route add default gw 192.168.43.1
+辅助软件：busybox、z4root
+关键点：手机上的网关IP和电脑上的IP一样。
+
+方法二：无线网卡，手机AP
+此方法适用于笔记本有无线网卡，但不支持adhoc，支持anhoc的建议使用方法三。
+1、勾选“设置 -> 无线和网络 -> 绑定与便携热点 -> 便携式Wi-Fi热点”选项，并设置AP（比如：myAp）；
+2、电脑连接到myAp并获取ip地址（比如：192.168.23.121）；
+3、添加默认网关
+#busybox route add default gw 192.168.23.121
+辅助软件：busybox、z4root
+关键点：手机上的网关IP和电脑上的IP一样。
+
+方法三：支持adhoc的无线网卡，组建wifi
+如果电脑本身带的无线网卡不支持的话，可以买一个支持adhoc的usb无线网卡（一般都带驱动，可以直接模拟AP供手机用）。
+这里以win7为例，说下大致流程，具体可见http://www.deepin.org/article-117-1.html
+1、以管理员身份运行命令提示符；
+2、启用并设定“虚拟Wifi网卡”模式；
+运行以下命令启用虚拟无线网卡：
+netsh wlan set hostednetwork mode=allow ssid=(这里写无线网名字) key=(这里是密码)
+3、启用“Internet连接共享(ICS)”；
+4、开启无线网络 ：netsh wlan start hostednetwork 
+5、手机连接设置的wifi
+好，就这些了，希望对你有帮助。

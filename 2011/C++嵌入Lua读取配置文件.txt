@@ -1,0 +1,66 @@
+这段时间一直在写工具，遇到一些问题，Google下解决了，这里想把解决问题的成果提取出来分享下，也方便我以后使用，^_^
+写工具就应该尽量的灵活，可配置性强，配置文件是少不了的。
+之前用过自定义配置文件（我的另一篇文章中提到过：http://www.cnblogs.com/MikeZhang/archive/2011/11/19/2255169.html），灵活是灵活，可写起来有点麻烦，而且如果想把部分逻辑写在外面，在配置文件中弄个函数就很不随意了——自己要写个脚本引擎进行解析……
+
+最后决定用lua作为配置文件的解析器，这里有个简单的demo：
+
+////////////////////////////////////////////////////////////////////////////
+/*
+File      : demo.cpp
+Author    : Mike
+E-Mail    : Mike_Zhang@live.com
+*/
+#include <stdio.h>
+extern "C"
+{
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
+
+lua_State *L;
+const char *lua_Script = "function add(a, b) return (a+b) end ";
+
+int lua_add(lua_State *L, const char *fun_name, int x, int y)
+{
+    int ret;
+    lua_getglobal(L, fun_name);
+    lua_pushnumber(L, x);
+    lua_pushnumber(L, y);
+    lua_call(L, 2, 1);
+    ret = (int)lua_tointeger(L, -1);
+    lua_pop(L, 1);
+    return ret;
+}
+
+int test()
+{
+    int ret = 0;
+    lua_State *L = lua_open();  /* opens Lua */
+    luaL_openlibs(L);
+    if (luaL_dostring(L, lua_Script))  // Run lua script
+    {
+        printf("error!\n");
+        lua_close(L);
+        return -1;
+    }
+    ret = lua_add(L, "add", 4, 5);
+    printf("%d\n",ret);
+    lua_close(L);
+    return 0;
+}
+
+int main()
+{
+    test();
+    return 0;
+}
+////////////////////////////////////////////////////////////////////////////
+
+
+
+另外，我自己写了个C++调用Lua的类，感兴趣的话，可以到这里去找：
+项目地址：http://sourceforge.net/projects/cppcalllua/
+svn访问：svn checkout http://svn.code.sf.net/p/cppcalllua/code-0/trunk cppcalllua-code-0
+
+Tips : 这是一个CodeBlocks的工程，工程文件 : CppCallLua.cbp

@@ -1,0 +1,40 @@
+用lua给Asterisk写拨号方案
+
+环境：
+　　操作系统：CentOS 6.0
+　　Asterisk版本：1.8.7.1
+　　lua版本：5.1.4
+步骤：
+1、安装lua开发包
+　　yum install lua-devel
+2、确认已经选择pbx_lua模块
+　　./configure
+　　make menuselect
+　　确认"PBX Modules -> pbx_lua"选中
+3、安装asterisk
+　　make 
+　　make install
+　　make samples
+4、添加拨号方案
+　　普通情况下，是在extensions.conf中添加拨号方案：
+　　[DialPlanTest]
+　　exten => 7333,1,Dial(SIP/1019,60)
+　　这里我在extensions.lua中添加拨号方案:
+　　[root@local]# cat extensions.lua
+　　extensions = {
+　　TestLua = {
+　　["7333"] = function(context,extension)
+　　app.dial("SIP/1019",60)　　
+　　end;
+　　};
+　　DialPlanTest = {
+　　　　include = {"TestLua"};
+　　　　};
+　　}
+5、修改用户配置
+修改 /etc/asterisk/users.conf 文件中用户1011的参数：
+;context = DLPN_DialPlan1
+context = DialPlanTest
+6、重启生效
+asterisk -rx "core restart now"
+这时用1011呼叫7333将会重定向到1019

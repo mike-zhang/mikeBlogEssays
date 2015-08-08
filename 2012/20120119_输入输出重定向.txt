@@ -1,0 +1,119 @@
+输入输出重定向
+
+想象一下，当我们写了个程序，开始是在命令行下运行的程序，后来用MFC之类的改写为窗体程序，我们原先用printf输出的trace都不可见了，但是我们又需要(输出到文件分析)，怎么办？
+1、开始写的时候你定义一个MyTrace的宏；
+2、你可以把printf换成fprintf；
+3、使用输出重定向。
+
+第一种情况很方便，可程序已经写出来了，显然不大可能；
+第二种情况可以是可以，但劳动量比较大；
+第三种我觉得可以。
+
+还记得不，在windows终端输入 "dir > 1.txt"，或在linux终端输入"ls > 1.txt"，即可实现把当前目录的文件列表导出到"1.txt"中。这里就用到了输出重定向，很方便吧，我们也可以仿照这个去做。
+
+
+这里只是提供一个思路，下面有几段IO重定向的示例代码，有C的，有python的，还有perl的（年终总结，三种语言都总结了，哈哈），仅供参考。
+
+基于c的示例代码：
+
+/*
+ File      : redirect.c
+ Author    : Mike
+ E-Mail    : Mike_Zhang@live.com
+*/
+#include <stdio.h>
+#include <stdlib.h>
+
+void test_stdin()
+{
+	char buf[128];
+	freopen("1.txt", "r", stdin); //redirect stdin
+	scanf("%s",buf);
+	printf("%s\n",buf);
+	freopen("CON", "r", stdin); //recover(Windows)
+	//freopen("/dev/console", "r", stdin); //recover(Linux)
+	//freopen("/dev/pts/0", "r", stdin); //recover stdin(Linux : my putty client)
+	scanf("%s",buf);
+	printf("%s\n",buf);
+}
+
+void test_stdout()
+{
+	freopen("1.txt", "w", stdout); //redirect stdout
+	printf("test");
+	freopen("CON", "w", stdout); //recover stdout(Windows)
+	//freopen("/dev/console", "w", stdout); //recover stdout(Linux)
+	//freopen("/dev/pts/0", "w", stdout); //recover stdout(Linux : my putty client)
+	printf("OK\n");
+}
+
+int main()
+{
+	printf("Test stdout : \n");
+	test_stdout();
+	printf("Test stdin : \n");
+	test_stdin();
+	return 0;
+}
+
+基于python的示例代码：
+
+#! /usr/bin/python
+import sys
+'''
+  File      : redirect.py
+  Author    : Mike
+  E-Mail    : Mike_Zhang@live.com
+'''
+print "Test stdout : "
+#redirect stdout
+tmp = sys.stdout
+fp = open("1.txt","w")
+sys.stdout = fp
+print 'Just a test'
+sys.stdout = tmp #recover stdout
+print 'test2'
+fp.close()
+
+print "Test stdin : "
+#redirect stdin
+tmp = sys.stdin
+fp = open("1.txt","r")
+sys.stdin = fp
+strTest = raw_input()
+print strTest
+sys.stdin = tmp # recover stdin
+strTest = raw_input()
+print strTest
+fp.close()
+
+
+基于perl的示例代码：
+
+#! /usr/bin/perl
+=cut
+	File      : redirect.pl
+	Author    : Mike
+	E-Mail    : Mike_Zhang@live.com
+=cut
+
+#redirect STDOUT
+print "Test stdout : \n";
+open LOG,"> 2.txt";
+select LOG;
+print "just a test\n";
+#recover STDOUT
+select STDOUT;
+print "just a test2\n";
+close LOG;
+
+#redirect STDIN
+print "Test stdin : \n";
+open LOG2,"< 2.txt";
+$line = <LOG2>;
+print $line;
+close LOG2;
+$line = <STDIN>;
+print $line;
+
+好，就这些了

@@ -1,0 +1,69 @@
+批量下载RFC文档(python实现)
+
+RFC文档有很多，有时候在没有联网的情况下也想翻阅，只能下载一份留存本地了。
+看了看地址列表，大概是这个范围：
+http://www.networksorcery.com/enp/rfc/rfc1000.txt
+...
+http://www.networksorcery.com/enp/rfc/rfc6409.txt
+
+哈哈，很适合批量下载，第一个想到的就是迅雷……
+可用的时候发现它只支持三位数的扩展(用的是迅雷7)，我想要下的刚好是四位数……
+郁闷之下萌生自己做一个的想法！
+这东西很适合用python做，原理很简单，代码也很少，先读为快。
+代码如下：
+#! /usr/bin/python
+'''
+  File      : getRFC.py
+  Author    : Mike
+  E-Mail    : Mike_Zhang@live.com
+'''
+import urllib,os,shutil,time
+
+def downloadHtmlPage(url,tmpf = ''):
+	i = url.rfind('/')
+	fileName = url[i+1:]
+	if tmpf : fileName = tmpf
+	print url,"->",fileName
+	urllib.urlretrieve(url,fileName)
+	print 'Downloaded ',fileName	
+	time.sleep(0.2)
+	return fileName
+	
+# http://www.networksorcery.com/enp/rfc/rfc1000.txt
+# http://www.networksorcery.com/enp/rfc/rfc6409.txt
+if __name__ == '__main__':
+	addr = 'http://www.networksorcery.com/enp/rfc'	
+	dirPath = "RFC"
+	#startIndex = 1000
+	startIndex = int(raw_input('start : '))
+	#endIndex = 6409
+	endIndex = int(raw_input('end : '))
+	if startIndex > endIndex : 
+		print 'Input error!'		
+	if False == os.path.exists(dirPath):
+		os.makedirs(dirPath)	
+	fileDownloadList = []
+	logFile = open("log.txt","w")
+	for i in range(startIndex,endIndex+1):
+		try:			
+			t_url = '%s/rfc%d.txt' % (addr,i)
+			fileName = downloadHtmlPage(t_url)
+			oldName = './'+fileName
+			newName = './'+dirPath+'/'+fileName
+			if True == os.path.exists(oldName):
+				shutil.move(oldName,newName)
+				print 'Moved ',oldName,' to ',newName
+		except:
+			msgLog = 'get %s failed!' % (i)
+			print msgLog
+			logFile.write(msgLog+'\n')
+			continue
+	logFile.close()
+
+除了RFC文档，这个程序稍加修改也可以做其它事情：比如批量下载MP3、电子书等等。
+好，就这些了，希望对你有帮助。
+
+
+
+
+				

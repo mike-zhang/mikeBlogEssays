@@ -1,0 +1,50 @@
+﻿获得CPU利用率（python调用top命令实现)
+
+本文定位：想通过python调用top命令获取cpu使用率但暂时没有思路的情况。
+如果单纯为了获得cpu的利用率，通过top命令重定向可以轻松实现，命令如下：
+
+top -bi > cpuHistory.log
+或
+top -bi | tee  cpuHistory.log
+
+这个就不解释了，不懂的朋友查询下top的帮助文档。这里要实现的是通过python调用top命令，并获得cpu的利用率信息。
+用过popen的朋友很快就能想到类似如下的代码（这个是我第一次写的代码，*_*）：
+
+#! /usr/bin/python
+
+import os,time
+
+time2sleep = 1.5
+while True:
+        print os.popen('top -bi -n 1').read().split('\n')[2]
+        time.sleep(time2sleep)
+
+原理看起来没错，可是跑起来就出问题了：cpu的idle值一直不变！！！
+原因在于执行的命令“top -bi -n 1”：单独执行这个命令，你会发现输出结果中cpu的idle值就是一直不变的。
+所以不能这样写……
+在终端执行“top -bi -n 2”命令，你会发现第二个值每次都在变化，这个就是我们想要结果。
+考虑到时间问题，命令这样写会更好：“top -bi -n 2 -d 0.02”
+代码如下：
+
+#! /usr/bin/python
+'''
+   File      : cpuRate.py
+   Author    : Mike
+   E-Mail    : Mike_Zhang@live.com
+ '''
+import os,time
+
+time2sleep = 2.5
+while True:
+        print int(time.time()),
+        print os.popen('top -bi -n 2 -d 0.02').read().split('\n\n\n')[1].split('\n')[2]
+        time.sleep(time2sleep)
+
+执行效果如下：
+$ ./cpuRate.py 
+1328109437 Cpu(s): 10.0%us, 20.0%sy,  0.0%ni, 70.0%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st
+1328109441 Cpu(s):  0.0%us, 16.7%sy,  0.0%ni, 83.3%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st
+1328109444 Cpu(s):  0.0%us, 16.7%sy,  0.0%ni, 83.3%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st
+1328109447 Cpu(s): 12.5%us, 12.5%sy,  0.0%ni, 75.0%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st
+
+好，就这些了，希望对你有帮助。

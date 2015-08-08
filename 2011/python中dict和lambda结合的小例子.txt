@@ -1,0 +1,72 @@
+python中dict和lambda结合的小例子
+
+python的dict用起来很方便，可以自定义key值，并通过下标访问，示例如下：
+
+>>> d = {'key1':'value1',
+... 'key2':'value2',
+... 'key3':'value3'}
+>>> print d['key2']
+value2
+>>>
+
+lambda表达式也是很实用的东东，示例如下：
+
+>>> f = lambda x : x**2
+>>> print f(2)
+4
+>>>
+
+两者结合可以实现结构相似的函数调用，使用起来很方便，示例如下：
+ 
+示例一：不带参数，调用其它函数
+
+[mike@localhost test]$ cat 2.py
+#! /usr/bin/python
+
+msgCtrl = "1 : pause\n2 : stop\n3 : restart\nother to quit\n"
+
+ctrlMap = {
+'1':    lambda : doPause(),
+'2':    lambda : doStop(),
+'3':    lambda : doRestart()}
+
+def doPause():
+        print 'do pause'
+
+def doStop():
+        print 'do stop'
+
+def doRestart():
+        print 'do restart'
+
+if __name__ == '__main__':
+        while True:
+                print msgCtrl
+                cmdCtrl = raw_input('Input : ')
+                if not ctrlMap.has_key(cmdCtrl):break
+                ctrlMap[cmdCtrl]()
+
+[mike@localhost test]$
+
+示例二：带参数
+
+[mike@localhost test]$ cat 3.py
+#! /usr/bin/python
+
+msgCtrl = "1 : +\n2 : -\n3 : *\nother to quit\n"
+
+ctrlMap = {
+'1':    lambda x,y : x+y,
+'2':    lambda x,y : x-y,
+'3':    lambda x,y : x*y}
+
+
+if __name__ == '__main__':
+        while True:
+                print msgCtrl
+                cmdCtrl = raw_input('Input : ')
+                if not ctrlMap.has_key(cmdCtrl):break
+                print ctrlMap[cmdCtrl](10,2),"\n"
+
+[mike@localhost test]$
+

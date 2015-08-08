@@ -1,0 +1,91 @@
+线程休眠代码(C/C++)
+
+linux平台示例：
+/*
+File      : thread1.c
+Author    : Mike
+E-Mail    : Mike_Zhang@live.com
+*/
+#include <stdio.h>
+#include <pthread.h>
+#include <time.h>
+void m_threadSleep(int sec,int nsec)
+{
+    struct timespec sleepTime;
+    struct timespec returnTime;
+    sleepTime.tv_sec = sec;
+    sleepTime.tv_nsec = nsec;
+    nanosleep(&sleepTime, &returnTime);
+}
+void test1()
+{
+    m_threadSleep(1,0);
+    printf("I'm thread1 ...\r\n");
+}
+void test2()
+{
+    m_threadSleep(2,0);
+    printf("I'm thread2 ...\r\n");
+}
+int main()
+{
+    pthread_t thread1,thread2;
+    void *result;
+    time_t tbegin,tend;
+    tbegin = time(NULL);
+    pthread_create(&thread1,NULL,(void*)&test1,NULL);
+    pthread_create(&thread2,NULL,(void*)&test2,NULL);
+    pthread_join(thread1,&result);
+    pthread_join(thread2,&result);
+    tend = time(NULL);
+    printf("%d\r\n",tend-tbegin);
+    return 0;
+}
+
+编译：
+gcc thread1.c -o thread1 -lpthread
+
+boost库实现示例：
+/*
+File      : boost_thread1.cpp
+Author    : Mike
+E-Mail    : Mike_Zhang@live.com
+*/
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread/thread.hpp>
+#include <iostream>
+
+boost::xtime getSleepTime(int sec,int nsec)
+{
+	boost::xtime t;
+	boost::xtime_get(&t, boost::TIME_UTC);
+	t.sec += sec;
+	t.nsec += nsec;
+	return t;
+}
+void test1()
+{
+    boost::this_thread::sleep(getSleepTime(1,500));
+    std::cout <<"I'm thread1 !"<< std::endl;
+}
+void test2()
+{
+    boost::this_thread::sleep(getSleepTime(3,500));
+    std::cout <<"I'm thread2 !"<< std::endl;
+}
+
+int main(int argc, char* argv[])
+{
+	boost::thread thrd1(&test1);
+	boost::thread thrd2(&test2);
+	std::time_t t_begin,t_end;
+	t_begin = time(NULL);
+	thrd1.join();
+	thrd2.join();
+	t_end = time(NULL);
+	std::cout<<t_end-t_begin<<std::endl;
+	return 0;
+}
+
+编译命令：
+g++ boost_thread1.cpp -o boost_thread1 -lboost_thread-mt

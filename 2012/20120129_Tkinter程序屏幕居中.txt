@@ -1,0 +1,32 @@
+Tkinter程序屏幕居中
+
+本文适用场景：想用Tkinter开发界面程序并居中，但没找到相应的API。
+
+这两天玩了玩Tkinter，感觉不错，就是屏幕居中这个问题在网上搜了很长时间也没找到答案，最后没办法，看它的文档，用自己的方法实现了。
+
+方法很土，就是获取初始化的窗体大小和屏幕大小，再通过计算得到大体值。
+以下是代码：
+
+#! /usr/bin/python
+'''
+  File      : screenCenter.pyw
+  Author    : Mike
+  E-Mail    : Mike_Zhang@live.com
+'''
+from Tkinter import *
+
+rt = Tk()
+rt.resizable(False,False)
+rt.title("Screen center") 
+
+rt.update() # update window ,must do
+curWidth = rt.winfo_reqwidth() # get current width
+curHeight = rt.winfo_height() # get current height
+scnWidth,scnHeight = rt.maxsize() # get screen width and height
+# now generate configuration information
+tmpcnf = '%dx%d+%d+%d'%(curWidth,curHeight,
+(scnWidth-curWidth)/2,(scnHeight-curHeight)/2)
+rt.geometry(tmpcnf)
+rt.mainloop()
+
+好，就这些了，希望对你有帮助。

@@ -1,0 +1,77 @@
+生成简单的Makefile文件(Python实现)
+
+在linux下写几个测试程序，还要一行行的输入g++命令进行编译，当经常改测试代码的时候，那一次次的敲（或者一次次的上线箭头选）也感觉不爽，不如make来的快。
+用Makefile的好处就不用多说了，这里我写了个脚本，其功能是自动搜索当前目录（不包括子目录）下的“.c”文件生成Makefile文件。
+代码在这里，功能有限（适用于单个文件是一个独立的测试代码的情况），需要的朋友可以稍作修改以满足需求。
+
+#! /usr/bin/python
+'''
+ File      : genMakefile.py
+ Author    : Mike
+ E-Mail    : Mike_Zhang@live.com
+'''
+import os
+
+def genMakefileStr(dir,surfix = '.c'):
+	msg = ''
+	msg = msg + 'CC = gcc' + '\n'
+	msg = msg +  'CFLAGS = -g -O2 -Wall' + '\n\n'
+	
+	fList = []
+	for dirPath,dirNames,fileNames in os.walk(dir):
+		for file in fileNames:
+			name,extension = os.path.splitext(file)
+			if extension == surfix:
+				fList.append(name)
+		break # only search the current directory
+	str1 = 'all:\n'
+	str2 = ''
+	str3 = 'clean:\n'
+	for f in fList:
+		str1 = str1 + '\tmake ' + f + '\n'
+		str2 = ('%s%s:%s.o\n') % (str2,f,f)
+		str2 = ('%s\t$(CC) -o %s %s.o\n\n') % (str2,f,f)
+		str3 = ('%s\trm -f %s\n') % (str3,f)
+	str3 = str3 + '\trm -f *.o\n'
+	strClean = '.c.o:\n\t$(CC) $(CFLAGS) -c -o $*.o $<\n'
+	msg = ('%s%s\n%s\n%s\n%s') % (msg,str1,str2,str3,strClean) 
+	#print 'msg : \n'
+	#print msg
+	return msg
+
+if __name__ == '__main__':
+	str = genMakefileStr('.','.c')
+	file = open("Makefile","w")
+	file.write(str)
+	file.close()
+	print str
+
+运行效果如下（示例）：
+
+# ./genMakefile.py          
+CC = gcc
+CFLAGS = -g -O2 -Wall
+
+all:
+        make pfun1
+        make pfun2
+
+pfun1:pfun1.o
+        $(CC) -o pfun1 pfun1.o
+
+pfun2:pfun2.o
+        $(CC) -o pfun2 pfun2.o
+
+
+clean:
+        rm -f pfun1
+        rm -f pfun2
+        rm -f *.o
+
+.c.o:
+        $(CC) $(CFLAGS) -c -o $*.o $<
+
+
+运行脚本后进行make即可。
+
+

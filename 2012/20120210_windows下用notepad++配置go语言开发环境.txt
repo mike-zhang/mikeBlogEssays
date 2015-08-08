@@ -1,0 +1,42 @@
+windows下用notepad++配置go语言开发环境
+
+我在前一篇文章（http://www.cnblogs.com/MikeZhang/archive/2012/02/09/windowsGo.html）中介绍了怎么在windows下安装go语言，今天我要介绍的是怎么用notepad++配置go语言开发环境。
+一、准备工作：
+1、安装go语言；
+2、将go/bin目录加入环境变量；
+3、安装notepad++；
+二、配置notepad++支持go语言语法高亮
+1、下载notepad++的go语言支持包（http://notepad-plus.sourceforge.net/commun/userDefinedLang/go.zip）；
+2、将文件userDefineLang_Go.xml内容copy至Application Data下Notepad++目录的userDefineLang.xml；
+　　XP: C:\Documents and Settings\[username]\Application Data\Notepad++
+　　Vista/Win7 : C:\Users\[username]\AppData\Roaming\Notepad++
+3、将go.xml文件copy至notepad++安装目录下的plugins\APIs目录（例如：D:\Program Files\Notepad++\plugins\APIs）；
+4、重启notepad++;
+三、设置go语言编译运行快捷键
+这里用下面的代码做演示：
+文件名：test1.go
+
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Test")
+}
+
+原理：
+	编译：8g -o test1.8 test1.go
+	链接：8l -o test1.exe test1.8
+	运行：test1.exe 
+	编译链接运行：8g -o test1.8 test1.go & 8l -o test1.exe test1.8 & test1.exe 
+
+具体实施：
+1、用notepad++打开test1.go文件；
+2、按F5，在弹出的对话框中输入以下内容：
+cmd /k 8g.exe -o tmp.8 "$(FULL_CURRENT_PATH)" & 8l.exe -o tmp.exe tmp.8 & del tmp.8 & tmp.exe & PAUSE & del tmp.exe & EXIT
+保存为"Run Go"，并设置Ctrl+F6为快捷键；
+3、按Ctrl+F6运行程序；
+
+好，就这些了，希望对你有帮助。
+
+

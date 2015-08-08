@@ -1,0 +1,52 @@
+手机变魔棒远程关电脑
+
+本文定位：手机通过电脑上网，睡觉时需要远程关机（太冷，懒得起来^_^）。
+
+前面提到过Android手机如何通过电脑上网（http://www.cnblogs.com/MikeZhang/archive/2012/02/04/androidComputerWifi.html），
+这篇文章是它的后续，介绍如何远程关机（以windows为例，提供一个思路）。
+
+想象下这个场景：冬天在被窝里面拿着Android手机通过电脑上网（看视频……），睡觉时还要爬起来去关电脑……很不爽吧！
+所以我们需要远程关机软件，可第三方的信不过，怎么办？
+自己写一个呗！
+其实很简单，原理如下：
+windows的关机命令为"shutdown -s -t 0"，程序的原理就是通过socket触发这个调用。
+这里有python的示例代码，需要的朋友可以改写下。
+
+PC服务端代码：
+
+'''
+     File      : shutdownSvr.py
+     Author    : Mike
+     E-Mail    : Mike_Zhang@live.com
+'''
+import socket,os
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+sock.bind(('192.168.123.1', 12345))  # my ip 
+sock.listen(5)  
+while True:  
+	connection,address = sock.accept()  
+	try:  
+		connection.settimeout(5)  
+		buf = connection.recv(1024)  
+		if buf == 'shutdown':  
+			os.system('shutdown -s -t 0')			
+	except socket.timeout:  
+		print 'time out'  
+	connection.close()  
+	 
+Android客户端代码：
+
+'''
+     File      : shutdownCli.py
+     Author    : Mike
+     E-Mail    : Mike_Zhang@live.com
+'''
+import socket  
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+sock.connect(('192.168.123.1', 12345))  
+sock.send('shutdown')  
+sock.close()  
+
+提示 ：Android上需要装python
+好，就这些了，希望对你有帮助。
+

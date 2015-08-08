@@ -1,0 +1,111 @@
+这段时间写程序用到了配置文件，感觉lua比较适合，就选用lua了。
+
+开始时所有配置都从文件加载，直接调用一个函数就OK了，后来考虑到如果配置文件不存在的话程序也要正常运行，所以程序需要默认配置。
+
+可我不想改变原来的结构，考虑将默认的配置脚本以字符串的形式硬编码在程序里面，这时遇到一个问题 ：默认配置大概6～7K的大小，如果一行行的敲，那感觉肯定是非常不爽……
+
+这重复性的劳动就交给电脑做吧，最后决定将这部分代码让电脑写（我之前写过了，它照着抄就是了 *_*）……
+可它不写啊，那好吧，我写个python代码教它吧：
+writeCode.py
+///////////////////////////////////////////////////////////////////
+
+#! /usr/bin/python
+# fileName  : writeCode.py
+# Author    : Mike
+# E-Mail    : Mike_Zhang@live.com
+
+import string
+
+endLinePos = -1 # windows '\n'
+#endLinePos = -2 # Linux '\r\n'
+
+fin = file("cnf.lua","r")
+fout = file("code.cpp","w")
+srcStr = '\"'
+dstStr = '\\\"'
+varNameStr = "luaScriptStr"
+
+for line in fin.readlines() :
+    if not line.split() : continue
+    tmp2 = ''
+    tmp2 += varNameStr
+    tmp2 += ' += \"'
+        
+    if line.count(srcStr) > 0 :
+        nStartPos = 0
+        nPos = 0            
+        while True :
+            nPos = line.find(srcStr,nStartPos)
+            if nPos == -1 :
+                tmp2 += line[nStartPos:endLinePos:]
+                break
+            tmp2 += line[nStartPos:nPos:]
+            tmp2 += dstStr
+            nStartPos = nPos+len(srcStr)        
+    else:
+        tmp2 += line[:endLinePos:]
+    tmp2 += '\";\n'
+    print tmp2,    
+    fout.write(tmp2)
+    fout.write("\n")
+fout.close()
+fin.close()
+raw_input()
+
+///////////////////////////////////////////////////////////////////
+
+writeCode.cpp
+//////////////////////////////////////////////////////////////////
+#include <iostream>
+#include <string>
+#include <fstream>
+
+using namespace std;
+
+int main()
+{
+    ifstream fin("cnf.lua");
+    ofstream fout("1.txt");
+    char buf[1024];
+    int i = 0,sz = 0;
+
+    string strVarName = "luaScript";
+
+    while(!fin.eof())
+    {
+        fin.getline(buf,sizeof(buf));
+//		cout<<buf<<endl;
+        string tmp1 = buf;
+        string tmp2 = "\"";
+
+        if("" == tmp1)
+            continue;
+        if(tmp1.find('\"') != string::npos)
+        {
+            int found1 = 0;
+            int found2 = tmp1.find('\"');
+            while(found2 != string::npos)
+            {
+                tmp2 += tmp1.substr(found1,found2);
+                tmp2 += "\\\"";
+                found1 = found2+1;
+                found2 = tmp1.find('\"',found1);
+            }
+        }
+        else
+        {
+            tmp2 += tmp1;
+        }
+        tmp2 += "\"";
+        cout<<strVarName<<" += "<<tmp2<<endl;
+        fout<<strVarName<<" += "<<tmp2<<endl;
+    }
+    fout.close();
+    fin.close();
+    return 0;
+}
+//////////////////////////////////////////////////////////////////
+
+
+
+
