@@ -22,7 +22,7 @@ QT网站：[http://qt-project.org/downloads](http://qt-project.org/downloads)
 
 默认路径为：C:\Qt\Qt5.2.0\5.2.0\msvc2010_opengl
 
-![](images/20140205_0101.png)
+![](images/20140205_0101.png?raw=true)
 
 
 ## 解析html
