@@ -9,7 +9,7 @@ windows下用notepad++配置go语言开发环境
 1、下载notepad++的go语言支持包（http://notepad-plus.sourceforge.net/commun/userDefinedLang/go.zip）；
 2、将文件userDefineLang_Go.xml内容copy至Application Data下Notepad++目录的userDefineLang.xml；
 　　XP: C:\Documents and Settings\[username]\Application Data\Notepad++
-　　Vista/Win7 : C:\Users\[username]\AppData\Roaming\Notepad++
+　　Vista/Win7 : C:\Users\[username]\AppData\Roaming\Notepad++ （比如： C:\Users\Administrator\AppData\Roaming\Notepad++）
 3、将go.xml文件copy至notepad++安装目录下的plugins\APIs目录（例如：D:\Program Files\Notepad++\plugins\APIs）；
 4、重启notepad++;
 三、设置go语言编译运行快捷键
