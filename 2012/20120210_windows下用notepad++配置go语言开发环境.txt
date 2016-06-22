@@ -1,20 +1,20 @@
-windowsÏÂÓÃnotepad++ÅäÖÃgoÓïÑÔ¿ª·¢»·¾³
+windowsä¸‹ç”¨notepad++é…ç½®goè¯­è¨€å¼€å‘ç¯å¢ƒ
 
-ÎÒÔÚÇ°Ò»ÆªÎÄÕÂ£¨http://www.cnblogs.com/MikeZhang/archive/2012/02/09/windowsGo.html£©ÖĞ½éÉÜÁËÔõÃ´ÔÚwindowsÏÂ°²×°goÓïÑÔ£¬½ñÌìÎÒÒª½éÉÜµÄÊÇÔõÃ´ÓÃnotepad++ÅäÖÃgoÓïÑÔ¿ª·¢»·¾³¡£
-Ò»¡¢×¼±¸¹¤×÷£º
-1¡¢°²×°goÓïÑÔ£»
-2¡¢½«go/binÄ¿Â¼¼ÓÈë»·¾³±äÁ¿£»
-3¡¢°²×°notepad++£»
-¶ş¡¢ÅäÖÃnotepad++Ö§³ÖgoÓïÑÔÓï·¨¸ßÁÁ
-1¡¢ÏÂÔØnotepad++µÄgoÓïÑÔÖ§³Ö°ü£¨http://notepad-plus.sourceforge.net/commun/userDefinedLang/go.zip£©£»
-2¡¢½«ÎÄ¼şuserDefineLang_Go.xmlÄÚÈİcopyÖÁApplication DataÏÂNotepad++Ä¿Â¼µÄuserDefineLang.xml£»
-¡¡¡¡XP: C:\Documents and Settings\[username]\Application Data\Notepad++
-¡¡¡¡Vista/Win7 : C:\Users\[username]\AppData\Roaming\Notepad++
-3¡¢½«go.xmlÎÄ¼şcopyÖÁnotepad++°²×°Ä¿Â¼ÏÂµÄplugins\APIsÄ¿Â¼£¨ÀıÈç£ºD:\Program Files\Notepad++\plugins\APIs£©£»
-4¡¢ÖØÆônotepad++;
-Èı¡¢ÉèÖÃgoÓïÑÔ±àÒëÔËĞĞ¿ì½İ¼ü
-ÕâÀïÓÃÏÂÃæµÄ´úÂë×öÑİÊ¾£º
-ÎÄ¼şÃû£ºtest1.go
+æˆ‘åœ¨å‰ä¸€ç¯‡æ–‡ç« ï¼ˆhttp://www.cnblogs.com/MikeZhang/archive/2012/02/09/windowsGo.htmlï¼‰ä¸­ä»‹ç»äº†æ€ä¹ˆåœ¨windowsä¸‹å®‰è£…goè¯­è¨€ï¼Œä»Šå¤©æˆ‘è¦ä»‹ç»çš„æ˜¯æ€ä¹ˆç”¨notepad++é…ç½®goè¯­è¨€å¼€å‘ç¯å¢ƒã€‚
+ä¸€ã€å‡†å¤‡å·¥ä½œï¼š
+1ã€å®‰è£…goè¯­è¨€ï¼›
+2ã€å°†go/binç›®å½•åŠ å…¥ç¯å¢ƒå˜é‡ï¼›
+3ã€å®‰è£…notepad++ï¼›
+äºŒã€é…ç½®notepad++æ”¯æŒgoè¯­è¨€è¯­æ³•é«˜äº®
+1ã€ä¸‹è½½notepad++çš„goè¯­è¨€æ”¯æŒåŒ…ï¼ˆhttp://notepad-plus.sourceforge.net/commun/userDefinedLang/go.zipï¼‰ï¼›
+2ã€å°†æ–‡ä»¶userDefineLang_Go.xmlå†…å®¹copyè‡³Application Dataä¸‹Notepad++ç›®å½•çš„userDefineLang.xmlï¼›
+ã€€ã€€XP: C:\Documents and Settings\[username]\Application Data\Notepad++
+ã€€ã€€Vista/Win7 : C:\Users\[username]\AppData\Roaming\Notepad++
+3ã€å°†go.xmlæ–‡ä»¶copyè‡³notepad++å®‰è£…ç›®å½•ä¸‹çš„plugins\APIsç›®å½•ï¼ˆä¾‹å¦‚ï¼šD:\Program Files\Notepad++\plugins\APIsï¼‰ï¼›
+4ã€é‡å¯notepad++;
+ä¸‰ã€è®¾ç½®goè¯­è¨€ç¼–è¯‘è¿è¡Œå¿«æ·é”®
+è¿™é‡Œç”¨ä¸‹é¢çš„ä»£ç åšæ¼”ç¤ºï¼š
+æ–‡ä»¶åï¼štest1.go
 
 package main
 
@@ -24,19 +24,24 @@ func main() {
     fmt.Println("Test")
 }
 
-Ô­Àí£º
-	±àÒë£º8g -o test1.8 test1.go
-	Á´½Ó£º8l -o test1.exe test1.8
-	ÔËĞĞ£ºtest1.exe 
-	±àÒëÁ´½ÓÔËĞĞ£º8g -o test1.8 test1.go & 8l -o test1.exe test1.8 & test1.exe 
+åŸç†ï¼š
+	ç¼–è¯‘ï¼š8g -o test1.8 test1.go
+	é“¾æ¥ï¼š8l -o test1.exe test1.8
+	è¿è¡Œï¼štest1.exe 
+	ç¼–è¯‘é“¾æ¥è¿è¡Œï¼š8g -o test1.8 test1.go & 8l -o test1.exe test1.8 & test1.exe 
 
-¾ßÌåÊµÊ©£º
-1¡¢ÓÃnotepad++´ò¿ªtest1.goÎÄ¼ş£»
-2¡¢°´F5£¬ÔÚµ¯³öµÄ¶Ô»°¿òÖĞÊäÈëÒÔÏÂÄÚÈİ£º
+å…·ä½“å®æ–½ï¼š
+1ã€ç”¨notepad++æ‰“å¼€test1.goæ–‡ä»¶ï¼›
+2ã€æŒ‰F5ï¼Œåœ¨å¼¹å‡ºçš„å¯¹è¯æ¡†ä¸­è¾“å…¥ä»¥ä¸‹å†…å®¹ï¼š
 cmd /k 8g.exe -o tmp.8 "$(FULL_CURRENT_PATH)" & 8l.exe -o tmp.exe tmp.8 & del tmp.8 & tmp.exe & PAUSE & del tmp.exe & EXIT
-±£´æÎª"Run Go"£¬²¢ÉèÖÃCtrl+F6Îª¿ì½İ¼ü£»
-3¡¢°´Ctrl+F6ÔËĞĞ³ÌĞò£»
+ä¿å­˜ä¸º"Run Go"ï¼Œå¹¶è®¾ç½®Ctrl+F6ä¸ºå¿«æ·é”®ï¼›
 
-ºÃ£¬¾ÍÕâĞ©ÁË£¬Ï£Íû¶ÔÄãÓĞ°ïÖú¡£
+go 1.6 é…ç½®å¦‚ä¸‹ï¼š
+
+cmd /k go run "$(FULL_CURRENT_PATH)" & PAUSE & EXIT
+
+3ã€æŒ‰Ctrl+F6è¿è¡Œç¨‹åºï¼›
+
+å¥½ï¼Œå°±è¿™äº›äº†ï¼Œå¸Œæœ›å¯¹ä½ æœ‰å¸®åŠ©ã€‚
 
 
