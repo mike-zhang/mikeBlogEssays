@@ -35,9 +35,9 @@ modules.conf.xml中开启python支持；
     import freeswitch
 
     def fsapi(session,stream,env,args):
-       stream.write("hello")
-       #stream.write(str(dir(freeswitch)))
-       freeswitch.consoleLog("info","test")
+        stream.write("hello")
+        #stream.write(str(dir(freeswitch)))
+        freeswitch.consoleLog("info","test")
 
 
 控制台测试
