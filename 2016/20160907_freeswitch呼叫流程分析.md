@@ -266,76 +266,71 @@ sip_dialogs
 
 - 先匹配freeswitch默认的codec，从加载的模块中查找支持类型的具体码率信息      
 
+sofia_handle_sip_i_invite      
+    => sofia_glue_tech_prepare_codecs        
+       => switch_loadable_module_get_codecs_sorted             
 
-    sofia_handle_sip_i_invite    
-        => sofia_glue_tech_prepare_codecs      
-           => switch_loadable_module_get_codecs_sorted             
+- 协商发给被叫的sdp    
 
--	协商发给被叫的sdp    
+sofia_glue_do_invite     
+    => sofia_glue_tech_prepare_codecs     
+        => switch_loadable_module_get_codecs_sorted     
 
+        ocodec + codec_string     
 
-      sofia_glue_do_invite
-          => sofia_glue_tech_prepare_codecs
-              => switch_loadable_module_get_codecs_sorted
-
-              ocodec + codec_string
-
--	产生M头，并发送包含sdp的invite    
+- 产生M头，并发送包含sdp的invite         
 
 
-      sofia_glue_do_invite
-      => sofia_glue_set_local_sdp
-      => generate_m               
-      => nua_invite
+sofia_glue_do_invite     
+=> sofia_glue_set_local_sdp     
+=> generate_m                    
+=> nua_invite     
 
--	协商200 OK的sdp      
+- 协商200 OK的sdp      
 
-
-      sofia_answer_channel
-          => sofia_glue_tech_prepare_codecs
-              => switch_loadable_module_get_codecs_sorted
+sofia_answer_channel     
+  => sofia_glue_tech_prepare_codecs     
+      => switch_loadable_module_get_codecs_sorted     
 
 ### 媒体交互              
 
--	RTP数据交互
+- RTP数据交互
+
+audio_bridge_on_exchange_media     
+  => audio_bridge_thread     
+
+收发音频数据            
+=> switch_core_session_read_frame     
+  => session->endpoint_interface->io_routines->read_frame 即： sofia_read_frame     
+
+=> switch_core_session_write_frame         
+  => perform_write     
+      => session->endpoint_interface->io_routines->write_frame 即： sofia_write_frame     
+
+收发视频数据     
+1、启动线程     
+=> launch_video         
+=> video_bridge_thread     
+
+2、收发数据     
+=> switch_core_session_read_video_frame     
+=>session->endpoint_interface->io_routines->read_video_frame     
+即：sofia_read_video_frame     
+
+=> switch_core_session_write_video_frame     
+=> session->endpoint_interface->io_routines->write_video_frame     
+即：sofia_write_video_frame     
 
 
-      audio_bridge_on_exchange_media
-          => audio_bridge_thread
 
-      收发音频数据            
-      => switch_core_session_read_frame
-          => session->endpoint_interface->io_routines->read_frame 即： sofia_read_frame
+- 终止RTP交互     
 
-      => switch_core_session_write_frame    
-          => perform_write
-              => session->endpoint_interface->io_routines->write_frame 即： sofia_write_frame
-
-      收发视频数据
-      1、启动线程
-      => launch_video    
-      => video_bridge_thread
-
-      2、收发数据
-      => switch_core_session_read_video_frame
-      =>session->endpoint_interface->io_routines->read_video_frame
-      即：sofia_read_video_frame
-
-      => switch_core_session_write_video_frame
-      => session->endpoint_interface->io_routines->write_video_frame
-      即：sofia_write_video_frame
-
-
-
--	终止RTP交互
-
-
-      audio_bridge_thread
-          => switch_core_session_kill_channel(session_b, SWITCH_SIG_BREAK);
-              即 ：switch_core_session_perform_kill_channel
-              =>  session->endpoint_interface->io_routines->kill_channel
-              即 : sofia_kill_channel
-                  => switch_rtp_break
+audio_bridge_thread     
+  => switch_core_session_kill_channel(session_b, SWITCH_SIG_BREAK);     
+      即 ：switch_core_session_perform_kill_channel     
+      =>  session->endpoint_interface->io_routines->kill_channel     
+      即 : sofia_kill_channel     
+          => switch_rtp_break     
 
 ## Sofia协议栈
 
