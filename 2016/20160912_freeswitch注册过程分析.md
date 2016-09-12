@@ -203,6 +203,9 @@ python模拟注册过程
 
     #! /usr/bin/env python
     #-*- coding:utf-8 -*-
+    
+    # sip reg test 
+    # E-Mail : Mike_Zhang@live.com
 
     import sys,socket,time,traceback
     import uuid
