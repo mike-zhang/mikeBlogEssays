@@ -10,12 +10,12 @@ freeswitch 版本 ： 1.6.8
 ### 消息框架
 SIP协议是基于文本的协议，SIP协议的消息都遵从一个统一的消息结构：
 起始行（Start-Line）、一个或多个头域（Message-Header）、表明域结束的空行（CRLF），以及
-可选的消息体（Message-Body）
+可选的消息体（Message-Body）        
 
-Start-Line
-* Message-Header
-CRLF
-[Message-Body]
+    Start-Line
+    * Message-Header
+    CRLF
+    [Message-Body]
 
 ### 消息头结构
 SIP协议定义了大量的消息头域，但在一个基本SIP请求中至少应该包含以下几个消息体头域：
