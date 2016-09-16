@@ -29,11 +29,11 @@ HostB ： 192.168.1.101
 - 1、编辑A机中 conf/dialplan/public.xml 文件 ，添加如下extension ：
 
 
-    <extension name="hostB">
-        <condition field="destination_number" expression="^0(.*)$">
-                <action application="bridge" data="sofia/external/sip:$1@192.168.168.101:5080" />
-        </condition>
-    </extension>
+        <extension name="hostB">
+            <condition field="destination_number" expression="^0(.*)$">
+                    <action application="bridge" data="sofia/external/sip:$1@192.168.168.101:5080" />
+            </condition>
+        </extension>
 
 
 - 2、B机上使用sipp模拟uas设备，命令如下：
@@ -49,32 +49,32 @@ A机重新加载xml文件（ F6 或 reloadxml ），在A的1000话机上拨打�
 - 1、在A机上创建 conf/sip_profiles/external/gw_a.xml 文件，添加如下内容：
 
 
-    <include>
-      <gateway name="gw_A">
-        <param name="username" value="anonymous"/>
-        <param name="from-user" value=""/>
-        <param name="password" value=""/>
-        <param name="outbound-proxy" value="192.168.1.101:5080"/>
-        <param name="register-proxy" value="192.168.1.101:5080"/>
-        <param name="expire-seconds" value="120"/>
-        <param name="register" value="false"/>
-        <param name="register-transport" value="UDP"/>
-        <param name="caller-id-in-from" value="true"/>
-        <param name="extension-in-contact" value="true"/>
-        <variables>
-          <variable name="gateway_name" value="gw_A"/>          
-        </variables>
-      </gateway>
-    </include>    
+        <include>
+          <gateway name="gw_A">
+            <param name="username" value="anonymous"/>
+            <param name="from-user" value=""/>
+            <param name="password" value=""/>
+            <param name="outbound-proxy" value="192.168.1.101:5080"/>
+            <param name="register-proxy" value="192.168.1.101:5080"/>
+            <param name="expire-seconds" value="120"/>
+            <param name="register" value="false"/>
+            <param name="register-transport" value="UDP"/>
+            <param name="caller-id-in-from" value="true"/>
+            <param name="extension-in-contact" value="true"/>
+            <variables>
+              <variable name="gateway_name" value="gw_A"/>          
+            </variables>
+          </gateway>
+        </include>    
 
 - 2、打开A机中 conf/dialplan/public.xml 文件 ，添加如下extension ：
 
 
-    <extension name="gw_A">
-            <condition field="destination_number" expression="^9(.*)$">
-                <action application="bridge" data="sofia/gateway/gw_A/$1"/>
-            </condition>
-    </extension>
+        <extension name="gw_A">
+                <condition field="destination_number" expression="^9(.*)$">
+                    <action application="bridge" data="sofia/gateway/gw_A/$1"/>
+                </condition>
+        </extension>
 
 - 3、B机上使用sipp模拟uas设备，命令如下：
 
