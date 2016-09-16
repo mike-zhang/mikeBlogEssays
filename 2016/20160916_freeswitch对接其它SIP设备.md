@@ -26,7 +26,7 @@ HostB ： 192.168.1.101
 
 ### 使用sip uri格式对接
 
-- 1、编辑A机中 conf/dialplan/public.xml 文件 ，添加如下extension ：
+1、编辑A机中 conf/dialplan/public.xml 文件 ，添加如下extension ：
 
 
         <extension name="hostB">
@@ -36,7 +36,7 @@ HostB ： 192.168.1.101
         </extension>
 
 
-- 2、B机上使用sipp模拟uas设备，命令如下：
+2、B机上使用sipp模拟uas设备，命令如下：
 
 
     sipp -sn uas -p 5080
@@ -46,7 +46,7 @@ A机重新加载xml文件（ F6 或 reloadxml ），在A的1000话机上拨打�
 
 ### 使用网关对接
 
-- 1、在A机上创建 conf/sip_profiles/external/gw_a.xml 文件，添加如下内容：
+1、在A机上创建 conf/sip_profiles/external/gw_a.xml 文件，添加如下内容：
 
 
         <include>
@@ -67,7 +67,7 @@ A机重新加载xml文件（ F6 或 reloadxml ），在A的1000话机上拨打�
           </gateway>
         </include>    
 
-- 2、打开A机中 conf/dialplan/public.xml 文件 ，添加如下extension ：
+2、打开A机中 conf/dialplan/public.xml 文件 ，添加如下extension ：
 
 
         <extension name="gw_A">
@@ -75,12 +75,13 @@ A机重新加载xml文件（ F6 或 reloadxml ），在A的1000话机上拨打�
                     <action application="bridge" data="sofia/gateway/gw_A/$1"/>
                 </condition>
         </extension>
+        
 
-- 3、B机上使用sipp模拟uas设备，命令如下：
+3、B机上使用sipp模拟uas设备，命令如下：
 
     sipp -sn uas -p 5080
     
-- 4、加载网关配置，需在A机器执行如下命令：
+4、加载网关配置，需在A机器执行如下命令：
 
     sofia profile external rescan
 
