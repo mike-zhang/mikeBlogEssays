@@ -95,32 +95,32 @@ sock.send(“auth ClueCon\r\n\r\n”)
 - api       
 执行freeswitch的API命令，阻塞执行。            
 语法：api <command> <args>                 
-示例：     
+示例：   
 
-    sock.send('api originate user/1000 &echo\r\n\r\n')
-    sock.send('api originate user/1001 &echo\r\n\r\n')
+        sock.send('api originate user/1000 &echo\r\n\r\n')
+        sock.send('api originate user/1001 &echo\r\n\r\n')
 
-socket会将上述两条指令同时发送给freeswitch，但freeswitch按顺序阻塞执行。
+    socket会将上述两条指令同时发送给freeswitch，但freeswitch按顺序阻塞执行。
 
 - bgapi     
 功能和api相同，非阻塞执行。             
 语法：bgapi  <command>  <args>             
 示例：     
 
-    sock.send('bgapi originate user/1000 &echo\r\n\r\n')
-    sock.send('bgapi originate user/1001 &echo\r\n\r\n')
-
-socket会将上述两条指令同时发送给freeswitch，同时执行。
+        sock.send('bgapi originate user/1000 &echo\r\n\r\n')
+        sock.send('bgapi originate user/1001 &echo\r\n\r\n')
+        
+    socket会将上述两条指令同时发送给freeswitch，同时执行。
 
 - event     
 启动或停止事件流。       
 语法：event  <format>  <event type list |all>          
-<format> : 	plain、json、xml              
-Event types ： 参考freeswitch事件类型              
+<format> : 	plain、json、xml                   
+Event types ： 参考freeswitch事件类型                   
 
 示例:             
 
-    sock.send('event json ALL\r\n\r\n')
+        sock.send('event json ALL\r\n\r\n')
 
 接收freeswitch所有事件，并以json格式返回。
 
@@ -129,7 +129,7 @@ Event types ： 参考freeswitch事件类型
 语法 ： noevents           
 示例：             
     
-    sock.send('noevents\r\n\r\n')
+        sock.send('noevents\r\n\r\n')
 
 - divert_events     
 脚本注册接收事件的函数分转到event  socket上。       
@@ -142,19 +142,19 @@ Event types ： 参考freeswitch事件类型
 
 只订阅CHANNEL_EXECUTE事件        
 
-    sock.send('filter Event-Name CHANNEL_EXECUTE\r\n\r\n')
+        sock.send('filter Event-Name CHANNEL_EXECUTE\r\n\r\n')
         
 只订阅uuid为34602e08-557a-494a-af47-99e9d55e26ed的事件
 
-    sock.send('filter Unique-ID 34602e08-557a-494a-af47-99e9d55e26ed\r\n\r\n')
+        sock.send('filter Unique-ID 34602e08-557a-494a-af47-99e9d55e26ed\r\n\r\n')
 
 - filter delete     
 取消订阅的事件。    
 语法：filter  delete  <EventHeader>  <ValueToFilter>       
 示例：     
 
-    sock.send('filter  delete  Event-Name CHANNEL_EXECUTE\r\n\r\n')    
-    sock.send('filter  delete  Unique-ID 34602e08-557a-494a-af47-99e9d55e26ed\r\n\r\n')
+        sock.send('filter  delete  Event-Name CHANNEL_EXECUTE\r\n\r\n')    
+        sock.send('filter  delete  Unique-ID 34602e08-557a-494a-af47-99e9d55e26ed\r\n\r\n')
 
 - nixevents     
 设置event socket禁止接收的事件类型。        
@@ -163,20 +163,19 @@ Event types ： 参考freeswitch事件类型
 
 不订阅HEARTBEAT事件
 
-    sock.send('nixevent HEARTBEAT\r\n\r\n')
-   
+        sock.send('nixevent HEARTBEAT\r\n\r\n')   
 
 - sendevent     
 发送一个事件到系统队列中。       
 语法：sendevent  <event-name>          
 示例（消息内容）：       
 
-    sendevent SOME_NAME
-    Event-Name: CUSTOM
-    Event-Subclass: albs::Section-Alarm
-    Section: 33
-    Alarm-Type: PIR
-    State: ACTIVE
+        sendevent SOME_NAME
+        Event-Name: CUSTOM
+        Event-Subclass: albs::Section-Alarm
+        Section: 33
+        Alarm-Type: PIR
+        State: ACTIVE
 
 - sendmsg       
 
@@ -184,28 +183,28 @@ Event types ： 参考freeswitch事件类型
 语法：sendmsg <uuid>       
 示例（消息内容）：   
 
-    sendmsg <uuid>
-    call-command: execute
-    execute-app-name: playback
-    execute-app-arg: /tmp/test.wav
+        sendmsg <uuid>
+        call-command: execute
+        execute-app-name: playback
+        execute-app-arg: /tmp/test.wav
 
 - execute           
 执行一个拨号规则的应用。        
 语法：         
 
-    sendmsg <uuid>      
-    call-command: execute
-    execute-app-name: <one of the applications>
-    execute-app-arg: <application data>
-    loops: <number of times to invoke the command, default: 1>
+        sendmsg <uuid>      
+        call-command: execute
+        execute-app-name: <one of the applications>
+        execute-app-arg: <application data>
+        loops: <number of times to invoke the command, default: 1>
 
 - hangup
 对活动的呼叫挂机。           
 语法： 
 
-    sendmsg <uuid>
-    call-command: hangup
-    hangup-cause: <one of the causes listed below>
+        sendmsg <uuid>
+        call-command: hangup
+        hangup-cause: <one of the causes listed below>
 
 - nomedia       
 
@@ -213,9 +212,9 @@ Event types ： 参考freeswitch事件类型
 
 语法：
 
-    sendmsg <uuid>
-    call-command: nomedia
-    nomedia-uuid: <noinfo>
+        sendmsg <uuid>
+        call-command: nomedia
+        nomedia-uuid: <noinfo>
 
 - log <level>       
 
