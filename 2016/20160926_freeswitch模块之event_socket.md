@@ -86,16 +86,20 @@ python示例代码如下：
 
 可以通过任何支持socket的语言控制freeswitch，这里以python为例子描述怎么通过socket控制freeswitch。
 
-- auth <password>
+- auth      
+    语法：
+        
+        auth <password>
 
-当用户第一次通过mod_event_socket连接到freeswitch时，必须进行认证，认证示例：
+    当用户第一次通过mod_event_socket连接到freeswitch时，必须进行认证，认证示例：
 
-sock.send(“auth ClueCon\r\n\r\n”)
+        sock.send(“auth ClueCon\r\n\r\n”)
 
-- api       
-执行freeswitch的API命令，阻塞执行。            
-语法：api <command> <args>                 
-示例：   
+- api         
+    执行freeswitch的API命令，阻塞执行。    
+    语法：     
+        api <command> <args>                 
+    示例：   
 
         sock.send('api originate user/1000 &echo\r\n\r\n')
         sock.send('api originate user/1001 &echo\r\n\r\n')
@@ -103,9 +107,10 @@ sock.send(“auth ClueCon\r\n\r\n”)
     socket会将上述两条指令同时发送给freeswitch，但freeswitch按顺序阻塞执行。
 
 - bgapi     
-功能和api相同，非阻塞执行。             
-语法：bgapi  <command>  <args>             
-示例：     
+    功能和api相同，非阻塞执行。             
+    语法：     
+        bgapi  <command>  <args>             
+    示例：     
 
         sock.send('bgapi originate user/1000 &echo\r\n\r\n')
         sock.send('bgapi originate user/1001 &echo\r\n\r\n')
@@ -113,33 +118,38 @@ sock.send(“auth ClueCon\r\n\r\n”)
     socket会将上述两条指令同时发送给freeswitch，同时执行。
 
 - event     
-启动或停止事件流。       
-语法：event  <format>  <event type list |all>          
-<format> : 	plain、json、xml                   
-Event types ： 参考freeswitch事件类型                   
-
-示例:             
+    启动或停止事件流。       
+    语法：     
+        event  <format>  <event type list |all>          
+        
+    format : 	plain、json、xml                   
+    Event types ： 参考freeswitch事件类型                   
+    示例:             
 
         sock.send('event json ALL\r\n\r\n')
 
     接收freeswitch所有事件，并以json格式返回。
 
-- noevents      
-关闭上一个event开启的事件         
-语法 ： noevents           
-示例：             
+- noevents          
+    关闭上一个event开启的事件         
+    语法 ：    
+        noevents           
+        
+    示例：             
     
         sock.send('noevents\r\n\r\n')
 
 - divert_events     
-脚本注册接收事件的函数分转到event  socket上。       
-语法：divert_events  <on|off>          
+    脚本注册接收事件的函数分转到event  socket上。       
+    语法：     
+        divert_events  <on|off>          
 
 - filter        
-设置event socket接收事件的类型。      
-语法：filter  <EventHeader>  <ValueToFilter>           
-示例：     
-
+    设置event socket接收事件的类型。      
+    语法：     
+        filter  <EventHeader>  <ValueToFilter>           
+    
+    示例：     
     只订阅CHANNEL_EXECUTE事件        
 
         sock.send('filter Event-Name CHANNEL_EXECUTE\r\n\r\n')
@@ -149,26 +159,33 @@ Event types ： 参考freeswitch事件类型
         sock.send('filter Unique-ID 34602e08-557a-494a-af47-99e9d55e26ed\r\n\r\n')
 
 - filter delete     
-取消订阅的事件。    
-语法：filter  delete  <EventHeader>  <ValueToFilter>       
-示例：     
+    取消订阅的事件。    
+    语法：     
+        filter  delete  <EventHeader>  <ValueToFilter>       
+    
+    示例：     
 
         sock.send('filter  delete  Event-Name CHANNEL_EXECUTE\r\n\r\n')    
         sock.send('filter  delete  Unique-ID 34602e08-557a-494a-af47-99e9d55e26ed\r\n\r\n')
 
 - nixevents     
-设置event socket禁止接收的事件类型。        
-语法：nixevents <event types | ALL| CUSTOM custom event sub-class>         
-示例：         
-
+    设置event socket禁止接收的事件类型。        
+    语法：
+    
+        nixevents <event types | ALL| CUSTOM custom event sub-class>         
+        
+    示例：         
     不订阅HEARTBEAT事件
 
         sock.send('nixevent HEARTBEAT\r\n\r\n')   
 
 - sendevent     
-发送一个事件到系统队列中。       
-语法：sendevent  <event-name>          
-示例（消息内容）：       
+    发送一个事件到系统队列中。       
+    语法： 
+    
+        sendevent  <event-name>          
+        
+    示例（消息内容）：       
 
         sendevent SOME_NAME
         Event-Name: CUSTOM
@@ -179,9 +196,12 @@ Event types ： 参考freeswitch事件类型
 
 - sendmsg       
 
-给一个uuid发送一个消息，可以执行其他模块的应用接口，也可以挂断电话等。       
-语法：sendmsg <uuid>       
-示例（消息内容）：   
+    给一个uuid发送一个消息，可以执行其他模块的应用接口，也可以挂断电话等。       
+    语法： 
+    
+        sendmsg <uuid>       
+        
+    示例（消息内容）：   
 
         sendmsg <uuid>
         call-command: execute
@@ -189,8 +209,8 @@ Event types ： 参考freeswitch事件类型
         execute-app-arg: /tmp/test.wav
 
 - execute           
-执行一个拨号规则的应用。        
-语法：         
+    执行一个拨号规则的应用。        
+    语法：         
 
         sendmsg <uuid>      
         call-command: execute
@@ -199,8 +219,8 @@ Event types ： 参考freeswitch事件类型
         loops: <number of times to invoke the command, default: 1>
 
 - hangup
-对活动的呼叫挂机。           
-语法： 
+    对活动的呼叫挂机。           
+    语法： 
 
         sendmsg <uuid>
         call-command: hangup
@@ -208,29 +228,32 @@ Event types ： 参考freeswitch事件类型
 
 - nomedia       
 
-控制freeswitch是否处于实时的媒体路径，这个命令支持用户对指定的通道启用或关闭媒体处理。            
+    控制freeswitch是否处于实时的媒体路径，这个命令支持用户对指定的通道启用或关闭媒体处理。            
 
-语法：
+    语法：
 
         sendmsg <uuid>
         call-command: nomedia
         nomedia-uuid: <noinfo>
 
-- log <level>       
+- log
+    语法：     
+        
+        log <level>       
 
-设置日志级别。
+    设置日志级别。
 
 - nolog     
 
-禁止日志。
+    禁止日志。
 
 - linger    
 
-告诉freeswitch当一个通道挂机时不要关闭socket连接，直到收取相关通道的最后一个事件。
+    告诉freeswitch当一个通道挂机时不要关闭socket连接，直到收取相关通道的最后一个事件。
 
 - nolinger
 
-关闭上次开启的linger命令。
+    关闭上次开启的linger命令。
 
 ## 通过freeswitch提供的ESL库进行控制
 
@@ -247,45 +270,45 @@ Event types ： 参考freeswitch事件类型
 
 - InBound模式
 
-Python示例代码：
+    Python示例代码：
 
-    import ESL
-    import time
+        import ESL
+        import time
 
-    hostIp,port,user = "127.0.0.1","8021","ClueCon"
+        hostIp,port,user = "127.0.0.1","8021","ClueCon"
 
-    con = ESL.ESLconnection(hostIp,port,user)
-    con.events("json","all")
-    for i in range(100):
-        eventData = con.recvEvent()
-        print eventData.getHeader("Event-Name")
-    con.disconnect()
+        con = ESL.ESLconnection(hostIp,port,user)
+        con.events("json","all")
+        for i in range(100):
+            eventData = con.recvEvent()
+            print eventData.getHeader("Event-Name")
+        con.disconnect()
 
 - OutBound模式
 
-配置dialplan：     
+    配置dialplan：     
 
-    <action application="socket" data="127.0.0.1:9000 async full"/>
+        <action application="socket" data="127.0.0.1:9000 async full"/>
 
-Python示例代码：
+    Python示例代码：
 
-    import SocketServer
-    import ESL
+        import SocketServer
+        import ESL
 
-    class ESLRequestHandler(SocketServer.BaseRequestHandler ):
-        def setup(self):
-            print self.client_address, 'connected!'
-            fd = self.request.fileno()
-            con = ESL.ESLconnection(fd)
-            if con.connected():
-                info = con.getInfo()
-                uuid = info.getHeader("unique-id")
-                print uuid
-                con.execute("answer","", uuid)
-                con.execute("playback","/tmp/sample.wav", uuid)
+        class ESLRequestHandler(SocketServer.BaseRequestHandler ):
+            def setup(self):
+                print self.client_address, 'connected!'
+                fd = self.request.fileno()
+                con = ESL.ESLconnection(fd)
+                if con.connected():
+                    info = con.getInfo()
+                    uuid = info.getHeader("unique-id")
+                    print uuid
+                    con.execute("answer","", uuid)
+                    con.execute("playback","/tmp/sample.wav", uuid)
 
-    server = SocketServer.ThreadingTCPServer(('', 9000), ESLRequestHandler)
-    server.serve_forever()
+        server = SocketServer.ThreadingTCPServer(('', 9000), ESLRequestHandler)
+        server.serve_forever()
     
     
 ### ESL接口介绍
@@ -402,9 +425,8 @@ ESLevent对象成员函数列表如下：
 
     eventData .getHeader('Event-Name') #获取事件名称
     
-- getBody()
-
-获取事件的正文
+- getBody()     
+    获取事件的正文
 
 - getType()         
     获取event object的事件类型         
