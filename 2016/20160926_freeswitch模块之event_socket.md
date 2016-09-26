@@ -10,7 +10,7 @@ mod_event_socket以socket的形式，对外提供控制FS一种途径，
 连接分两种模式： inbound/outbound       
 mod_event_socket 的默认加载模式是inbound,outbound模式需要在dialplan的配置文件中设置。
 
-InBound模式由于是可以主动连接并可长期稳定保持，且此通道有且只有一个，心跳、外呼和注册等动作必须通过此种连接完成
+InBound模式由于是可以主动连接并可长期稳定保持，且此通道有且只有一个，心跳、外呼和注册等动作必须通过此种连接完成;
 
 OutBound模式由于是在外线呼入和内线呼出的时候才会触发socket连接事件，所以是不稳定的，且由于同一时间呼入数量不唯一，所以此连接的数目也是动态变化的，但是由于其每个来电建立一个socket连接，所以在大负荷情况下不会造成命令和事件的堵塞。
 
@@ -122,7 +122,7 @@ Event types ： 参考freeswitch事件类型
 
         sock.send('event json ALL\r\n\r\n')
 
-接收freeswitch所有事件，并以json格式返回。
+    接收freeswitch所有事件，并以json格式返回。
 
 - noevents      
 关闭上一个event开启的事件         
@@ -140,11 +140,11 @@ Event types ： 参考freeswitch事件类型
 语法：filter  <EventHeader>  <ValueToFilter>           
 示例：     
 
-只订阅CHANNEL_EXECUTE事件        
+    只订阅CHANNEL_EXECUTE事件        
 
         sock.send('filter Event-Name CHANNEL_EXECUTE\r\n\r\n')
         
-只订阅uuid为34602e08-557a-494a-af47-99e9d55e26ed的事件
+    只订阅uuid为34602e08-557a-494a-af47-99e9d55e26ed的事件
 
         sock.send('filter Unique-ID 34602e08-557a-494a-af47-99e9d55e26ed\r\n\r\n')
 
@@ -161,7 +161,7 @@ Event types ： 参考freeswitch事件类型
 语法：nixevents <event types | ALL| CUSTOM custom event sub-class>         
 示例：         
 
-不订阅HEARTBEAT事件
+    不订阅HEARTBEAT事件
 
         sock.send('nixevent HEARTBEAT\r\n\r\n')   
 
@@ -312,62 +312,62 @@ Python示例代码：
 ESLconnection对象维护与freeswitch之间的连接，以发送命令并进行事件处理。
 成员函数列表如下：
 
-- socketDescriptor()
-该函数返回连接的UNIX文件句柄
+- socketDescriptor()          
+    该函数返回连接的UNIX文件句柄
 
-- connected()
-判断是否已连接，连接返回1，否则返回0
+- connected()           
+    判断是否已连接，连接返回1，否则返回0
 
-- getInfo()
+- getInfo()     
 
-当freeswitch使用outbound模式连接时，它将首先发一个CHANNEL_DATA事件，getInfo会返回该事件；         
-在inbound模式中返回None
+    当freeswitch使用outbound模式连接时，它将首先发一个CHANNEL_DATA事件，getInfo会返回该事件；                 
+    在inbound模式中返回None           
 
-- send(command)
-向freeswitch发送一个command，但不会等待返回结果，需要显式调用recvEvent或recvEventTimed以接收返回的事件。        
+- send(command)     
+    向freeswitch发送一个command，但不会等待返回结果，需要显式调用recvEvent或recvEventTimed以接收返回的事件。        
 
-- sendRecv(command) 
-向freeswitch发送一个command，并等待返回结果（一个ESLevent对象）。
+- sendRecv(command)         
+    向freeswitch发送一个command，并等待返回结果（一个ESLevent对象）。
 
-- api(command[,arguments])
-向freeswitch发送api命令，阻塞执行 
+- api(command[,arguments])      
+    向freeswitch发送api命令，阻塞执行 
 
-- bgapi(command[, arguments][,custom_job_uuid])
-向freeswitch发送bgapi命令，后台执行，非阻塞执行     
+- bgapi(command[, arguments][,custom_job_uuid])     
+    向freeswitch发送bgapi命令，后台执行，非阻塞执行     
 
-- sendEvent(event)      
-向freeswitch发送一个事件
-- sendMSG(event,uuid)
-参考sendmsg命令 
+- sendEvent(event)        
+    向freeswitch发送一个事件
+- sendMSG(event,uuid)   
+    参考sendmsg命令 
 
-- recvEvent()
-从freeswitch接收事件，阻塞模式
+- recvEvent()   
+    从freeswitch接收事件，阻塞模式
 
-- recvEventTimed(milliseconds)  
-与recvEvent类似，但不会无限等待，而是在参数指定的毫秒数会返回。            
-recvEventTimed(0)会立即返回。 
+- recvEventTimed(milliseconds)      
+    与recvEvent类似，但不会无限等待，而是在参数指定的毫秒数会返回。             
+    recvEventTimed(0)会立即返回。 
 
-- filter (header,value)     
-事件过滤，类似filter命令。
+- filter (header,value)      
+    事件过滤，类似filter命令。
 
-- events (event_type,value)     
-事件订阅，类似event命令。
+- events (event_type,value)            
+    事件订阅，类似event命令。
 
-- execute (app[,arg][,uuid])        
-执行dialplan的app，并阻塞等待返回.
-返回结果为一个ESLevent对象，通过getHeader(“Reply-Text”)可以获取返回值，”+OK”表示成功，”-ERR”表示失败。
+- execute (app[,arg][,uuid])          
+    执行dialplan的app，并阻塞等待返回. 
+    返回结果为一个ESLevent对象，通过getHeader(“Reply-Text”)可以获取返回值，”+OK”表示成功，”-ERR”表示失败。    
 
-- executeAsync (app[,arg][,uuid])       
-与execute()相同，但非阻塞执行。        
+- executeAsync (app[,arg][,uuid])        
+    与execute()相同，但非阻塞执行。        
 
-- setAsyncExecute(value)        
-强制将socket设置为异步模式，value为1是异步，0是同步。   
+- setAsyncExecute(value)          
+    强制将socket设置为异步模式，value为1是异步，0是同步。   
 
-- setEventLock(value)       
-使用该选项后，后续所有的execute()调用都将带有”event-lock:true”头域。 
+- setEventLock(value)            
+    使用该选项后，后续所有的execute()调用都将带有”event-lock:true”头域。 
 
-- disconnect()  
-主动中断与freeswitch的连接。 
+- disconnect()      
+    主动中断与freeswitch的连接。 
 
 #### ESLevent对象         
 
@@ -384,18 +384,18 @@ ESLevent对象成员函数列表如下：
 
 - serialize([format])
 
-将event数据转换成”name:value”型数据，format参数可以为：     
+    将event数据转换成”name:value”型数据，format参数可以为：     
 
-"xml"           
-"json"          
-"plain" (default)           
+    "xml"           
+    "json"          
+    "plain" (default)           
 
-示例如下：
+    示例如下：
 
-    eventData.serialize('json') 获取json格式数据
+        eventData.serialize('json') 获取json格式数据
 
 - setPriority([number])     
-设置事件的级别         
+    设置事件的级别         
 
 - getHeader(headerName)     
 获取header对应的value，示例如下：      
@@ -406,27 +406,27 @@ ESLevent对象成员函数列表如下：
 
 获取事件的正文
 
-- getType()     
-获取event object的事件类型         
+- getType()         
+    获取event object的事件类型         
 
-- addBody(value)    
-向事件中加入正文，可以调用多次
+- addBody(value)           
+    向事件中加入正文，可以调用多次
 
-- addHeader(key,value)  
-向事件中加入一个头域(ESL_STACK_BOTTOM)
+- addHeader(key,value)      
+    向事件中加入一个头域(ESL_STACK_BOTTOM)
 
-- pushHeader(key,value)
-向事件中加入一个头域(ESL_STACK_PUSH)
+- pushHeader(key,value)     
+    向事件中加入一个头域(ESL_STACK_PUSH)
 
-- unshiftHeader(key,value)
-向事件中加入一个头域(ESL_STACK_UNSHIFT)
+- unshiftHeader(key,value)      
+    向事件中加入一个头域(ESL_STACK_UNSHIFT)
 
-- delHeader(key)
-从Event中删除头域
+- delHeader(key)        
+    从Event中删除头域
 
-- firstHeader()
-将指针指向Event的第一个头域，并返回它的key值。它必须在nextHeader之前调用
+- firstHeader()     
+    将指针指向Event的第一个头域，并返回它的key值。它必须在nextHeader之前调用
 
-- nextHeader()
-移动指针指向下一个header，在函数调用前必须先调用firstHeader()
+- nextHeader()      
+    移动指针指向下一个header，在函数调用前必须先调用firstHeader()
 
