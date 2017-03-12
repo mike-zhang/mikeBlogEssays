@@ -165,7 +165,7 @@ InfluxDBClient中要指定连接的数据库，示例如下：
         }
     ]
 
-    client.write_points(json_body) # 写入数据，同时创建表
+    client.write_points(json_body) # 写入数据
 
 * 查询
 
