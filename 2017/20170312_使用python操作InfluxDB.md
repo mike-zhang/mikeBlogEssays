@@ -28,14 +28,14 @@ github地址： https://github.com/influxdata/influxdb-python
 
     yum install python-pip
 
-安装influxdb-python ：
-    
+安装influxdb-python ：     
+
     pip install influxdb        
 
 ## 基本操作    
 
 使用InfluxDBClient类操作数据库，示例如下：           
-    
+
     from influxdb import InfluxDBClient
     client = InfluxDBClient('localhost', 8086, 'root', '', '') # 初始化
 
@@ -52,11 +52,11 @@ github地址： https://github.com/influxdata/influxdb-python
 
     client.create_database('testdb') # 创建数据库      
 
-* 删除数据库
+* 删除数据库     
 使用drop_database函数，示例如下：             
 
     client.drop_database('testdb') # 删除数据库
-    
+
 数据库操作完整示例如下：        
 
     #! /usr/bin/env python
@@ -169,7 +169,7 @@ InfluxDBClient中要指定连接的数据库，示例如下：
 
 * 查询
 
-可以通过influxql语句实现，示例如下： 
+可以通过influxql语句实现，示例如下：
 
     result = client.query('select * from students;')    
     print("Result: {0}".format(result))
@@ -215,5 +215,3 @@ tags 和 timestamp相同时数据会执行覆盖操作，相当于InfluxDB的更
     showDatas(client)  # 查询数据
     client.query('delete from students;') # 删除数据
     showDatas(client)  # 查询数据
-
-
