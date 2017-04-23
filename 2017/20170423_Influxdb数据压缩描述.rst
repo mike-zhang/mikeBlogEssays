@@ -1,6 +1,9 @@
-influxdb数据压缩
+Influxdb数据压缩
 =================
 
+环境： CentOS6.5_x64         
+     
+InfluxDB版本：1.1.0
 
 数据压缩可以参考：
 
