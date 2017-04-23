@@ -1,0 +1,399 @@
+
+Influxdb数据存储
+======================    
+
+环境： CentOS6.5_x64         
+     
+InfluxDB版本：1.1.0
+
+InfluxDB存储引擎看起来很像一个LSM Tree，它包含预写日志和类似存储在LSM Tree中的SSTables只读数据。
+TSM文件包含已经排好序而且经过压缩的序列化数据。
+
+InfluxDB会为每个时间块创建一个分区。例如，如果你有一个没有时间限制的存储策略，会以7天为时间块来创建分区。
+这些分区会映射到底层数据库存储引擎。
+每个数据库会有自己的WAL文件和TSM文件。
+
+
+LSM Tree
+^^^^^^^^^^^^^^^^^^^
+
+如果要让写性能最优，最佳的实现方式是以追加的模式写磁盘文件。
+
+如果要优化读性能，常见的几种优化措施如下：  
+
+* 二分查找     
+
+将数据以key的方式排好序，然后存储在文件中，通过二分查找的方式查找数据。
+
+* Hash
+
+将数据经过hash后放入特定的位置，以后可以通过哈希值直接读取。
+
+* B+ Tree
+
+使用B+树来组织数据，将数据完全排序，读取时会非常快。
+一般来说，索引本身也很大，不可能全部存储在内存中，因此索引往往以索引文件的形式存储的磁盘上。
+所以对于数据库, 基本都是用B+树作为索引机制, 而没有用二叉树或他的变种红黑树的。
+
+* 使用额外的索引文件 
+
+除了本身存储的数据外，另外对其单独建立索引以加速读取。
+
+二分查找要求数据完全排序，显然会影响数据库的写入性能；
+
+对于数据库而言,因为要考虑到range查询, 要使用树系列（二叉树, 红黑树, B树, B+树），所以hash索引不行；
+
+B+树将数据完全排序，读取时很快，但是当要修改数据时，就需要将新入数据下面的数据重新排序，所以面对海量的随机更新，B+树的性能会明显下降；
+
+而使用外部索引的话，写数据时需要维护维护索引，根本无法抵御随机更新操作；
+
+InfluxDB采用的是LSM Tree(Log Structured Merge Trees)存储结构，这种数据组织方式被应用于多种数据库，如Big Table、HBase、Cassandra、LevelDB等。
+
+其实现思路和以上四中措施不太相同，它将随机写转换为顺序写，尽量保持日志型数据库的写性能优势，并提供相对较好的读性能。
+
+具体实现如下：
+
+1、当有写操作（含insert、update）时，先把数据写入内存，内存中通过某种数据结构（如skiplist）保持key有序，
+
+2、同时将数据追写到磁盘Log文件中，以备必要时恢复；
+
+3、内存数据定时（或按固定大小）排序后刷到磁盘，存储到磁盘的数据文件不可写且有序；
+
+4、定时合并文件，将小树合并为大树，消除冗余数据，减少文件数量，优化查询速度；
+
+LSM Tree存储结构执行写操作时，只需更新内存，硬盘的那份数据只是简单的追加操作，所以能处理大量随机更新操作；
+
+LSM Tree存储结构执行读操作时，先从内存数据开始访问，如果在内存中访问不到，
+再顺序从一个个磁盘文件中查找，由于文件本身有序，并且定期的合并减少了磁盘文件个数，因而查找过程相对较快速。
+
+由于时序数据库对写入的速度要求比较高，而读取一般是一段时间范围内的数据，使用LSM Tree算法非常合适。
+
+LSM Tree 描述：
+::
+    
+    http://www.benstopford.com/2015/02/14/log-structured-merge-trees/
+    http://blog.fatedier.com/2016/06/15/learn-lsm-tree/
+
+
+存储引擎模块
+^^^^^^^^^^^^^^^^^^^
+存储引擎将一些组件捆绑在一起并且提供一些额外的接口用来存储和查询序列化数据。
+
+它由以下这些组件构成，每个组件扮演不同的角色：
+
+* 内存索引
+
+内存索引是分区的索引，主要用于快速访问measurements,tags和series。
+
+* 预写日志
+
+预写日志是write-optimized存储格式的数据,允许写入持久化,但不易查询，写入时执行附加操作。     
+
+文件前缀： _     
+
+文件扩展名 : .wal        
+
+文件名称看起来大概是这样： _000001.wal
+
+文件名字中的数字是递增的，它是WAL段的索引。
+
+当一个WAL段的大小大于10M时（ DefaultSegmentSize = 10 * 1024 * 1024），它会关闭当前段并且创建一个新的段。
+
+每个WAL段存储多个经压缩的写和删除的操作指令。
+
+::
+
+    ┌───────────────────────────────────────────────────────────┐
+    │                          WALEntry                         │
+    ├──────────────┬──────────┬──────────┬───┬─────────────┬────┤
+    │ WALEntryType │ Data Len │   Data   │...│WALEntryType │... │
+    │   1 byte     │ 4 bytes  │ N bytes  │   │  1 byte     │    │
+    └──────────────┴──────────┴──────────┴───┴─────────────┴────┘
+    
+WALEntryType ： 用于标记数据操作类型（写入、删除、连续删除）
+::
+
+    const (
+        WriteWALEntryType       WalEntryType = 0x01
+        DeleteWALEntryType      WalEntryType = 0x02
+        DeleteRangeWALEntryType WalEntryType = 0x03
+    )
+
+Data len ： 后面数据的长度
+
+Data ：经过snappy压缩后的数据
+  
+
+相关配置参数可以在文件中查看：
+::
+
+    influxdb-1.1.0/tsdb/engine/tsm1/wal.go
+  
+WAL文件中的数据存储结构如下：
+::
+
+    ┌────────────────────────────────────────────────────────────────────┐
+    │                           WriteWALEntry                            │
+    ├──────┬─────────┬────────┬───────┬─────────┬─────────┬───┬──────┬───┤
+    │ Type │ Key Len │   Key  │ Count │  Time   │  Value  │...│ Type │...│
+    │1 byte│ 2 bytes │ N bytes│4 bytes│ 8 bytes │ N bytes │   │1 byte│   │
+    └──────┴─────────┴────────┴───────┴─────────┴─────────┴───┴──────┴───┘
+ 
+字段描述如下：     
+ 
+Type(1 byte)       : 表示value的类型（支持的类型有：浮点型，整型，布尔型，字符串型）             
+
+Key Len(2 bytes)   : 指定紧跟其后的Key的长度                  
+
+Key（N bytes）     ：key内容                 
+
+Count（4 bytes）   ：后面跟的（Time + Value作为一个整体）数据的个数             
+
+Time（8 bytes）    ：单个value的时间戳               
+
+Value（N bytes）   ：需要存储的数据（支持的类型有：浮点型，整型，布尔型，字符串型）               
+
+当Value为字符串类型时，Value 由于两部分构成：字符串长度（4Bytes） +  字符串内容（长度由前面决定）
+::
+
+    case *StringValue:
+        if curType != stringEntryType {
+            return nil, fmt.Errorf("incorrect value found in %T slice: %T", v[0].Value(), vv)
+        }
+        binary.BigEndian.PutUint32(dst[n:n+4], uint32(len(vv.value)))
+        n += 4
+        n += copy(dst[n:], vv.value)
+   
+
+* 缓存
+
+缓存是存储在WAL文件中的数据在内存中的一份拷贝，数据按key的方式组织，未压缩。 
+
+系统重启时，缓存会通过读取磁盘的WAL文件恢复。
+
+* TSM文件
+
+
+TSM文件是Influxdb中最终存储数据的载体，整体结构如下：
+::
+
+    ┌────────┬────────────────────────────────────┬─────────────┬──────────────┐
+    │ Header │               Blocks               │    Index    │    Footer    │
+    │5 bytes │              N bytes               │   N bytes   │   8 bytes    │
+    └────────┴────────────────────────────────────┴─────────────┴──────────────┘
+
+由四部分组成： Header,Blocks,Index,Footer      
+
+Header用于标识文件类型及版本号，Blocks用于存储数据，Index为Blocks的索引信息，Footer用于标识Index在TSM文件中的偏移量，便于快速访问。
+
+
+Header结构如下：
+::
+
+    ┌───────────────────┐
+    │      Header       │
+    ├─────────┬─────────┤
+    │  Magic  │ Version │
+    │ 4 bytes │ 1 byte  │
+    └─────────┴─────────┘
+
+Magic用于标识存储引擎类别，Version用于记录版本号，在influxdb1.1版本中定义如下：
+::
+
+    MagicNumber uint32 = 0x16D116D1
+
+    Version byte = 1
+
+Blocks结构如下：
+::
+
+    ┌───────────────────────────────────────────────────────────┐
+    │                          Blocks                           │
+    ├───────────────────┬───────────────────┬───────────────────┤
+    │      Block 1      │      Block 2      │      Block N      │
+    ├─────────┬─────────┼─────────┬─────────┼─────────┬─────────┤
+    │  CRC    │  Data   │  CRC    │  Data   │  CRC    │  Data   │
+    │ 4 bytes │ N bytes │ 4 bytes │ N bytes │ 4 bytes │ N bytes │
+    └─────────┴─────────┴─────────┴─────────┴─────────┴─────────┘
+    
+Blocks由多个Block构成，每个Block包含CRC32和Data两部分，其中CRC32用于校验Data的内容是否有问题，
+Data为存储的数据，Data的长度记录在之后的Index部分中。
+    
+    
+Index结构如下：
+::
+
+    ┌────────────────────────────────────────────────────────────────────────────┐
+    │                                   Index                                    │
+    ├─────────┬─────────┬──────┬───────┬─────────┬─────────┬────────┬────────┬───┤
+    │ Key Len │   Key   │ Type │ Count │Min Time │Max Time │ Offset │  Size  │...│
+    │ 2 bytes │ N bytes │1 byte│2 bytes│ 8 bytes │ 8 bytes │8 bytes │4 bytes │   │
+    └─────────┴─────────┴──────┴───────┴─────────┴─────────┴────────┴────────┴───┘
+
+    
+Kye Len (2 bytes) : 代表紧随其后的key的长度
+
+Key （N bytes）   ：Key的内容
+
+Type              ：数据类型
+
+::
+    
+    influxdb-1.1.0/tsdb/engine/tsm1/encoding.go
+    
+    ...
+    
+    const (
+        // BlockFloat64 designates a block encodes float64 values
+        BlockFloat64 = byte(0)
+
+        // BlockInteger designates a block encodes int64 values
+        BlockInteger = byte(1)
+
+        // BlockBoolean designates a block encodes boolean values
+        BlockBoolean = byte(2)
+
+        // BlockString designates a block encodes string values
+        BlockString = byte(3)
+
+        // encodedBlockHeaderSize is the size of the header for an encoded block.  There is one
+        // byte encoding the type of the block.
+        encodedBlockHeaderSize = 1
+    )
+    
+
+Count（2 bytes）    ： 后面跟的（Min Time + Max Time + Offset + Size作为一个整体）数据的个数 
+
+Min Time（8 bytes） ： block中value的最小时间戳
+
+Max Time（8 bytes） ： block中value的最大时间戳
+
+Offset（8 bytes）   ： 该block在tsm文件中的偏移量 
+
+Size（4Bytes）      ： block的大小  
+
+    
+    
+Footer结构如下：
+::
+
+    ┌─────────┐
+    │ Footer  │
+    ├─────────┤
+    │Index Ofs│
+    │ 8 bytes │
+    └─────────┘   
+
+tsm文件示例： 
+
+::
+
+    16 D1 16 D1 01 2C 30 A0 35 00 09 1C 13 E6 C9 EF
+    89 2E E4 00 10 3F E4 7A E1 47 AE 14 7B C3 F4 01 
+    C7 AE 14 7A E1 47 A0 A6 71 30 0F 00 09 1C 13 E6
+    C9 F4 31 46 AC 00 10 3F EF AE 14 7A E1 47 AE C3 
+    FC 01 7A E1 47 AE 14 7A F0 00 34 63 70 75 5F 6C 
+    6F 61 64 5F 73 68 6F 72 74 2C 68 6F 73 74 3D 73 
+    65 72 76 65 72 30 31 2C 72 65 67 69 6F 6E 3D 75 
+    73 2D 77 65 73 74 23 21 7E 23 76 61 6C 75 65 00 
+    00 02 13 E6 C9 EF 89 2E E4 00 13 E6 C9 EF 89 2E 
+    E4 00 00 00 00 00 00 00 00 05 00 00 00 22 13 E6 
+    C9 F4 31 46 AC 00 13 E6 C9 F4 31 46 AC 00 00 00 
+    00 00 00 00 00 27 00 00 00 22 00 00 00 00 00 00 
+    00 49
+    
+    
+参考代码：
+::
+
+    curl -i -XPOST http://localhost:8086/query --data-urlencode "q=CREATE DATABASE mydb"
+    curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary 'cpu_load_short,host=server01,region=us-west value=0.64 1434055562000000000'  
+ 
+
+Header部分 ： 16 D1 16 D1 01
+
+Blocks部分 ：
+::
+
+                   2C 30 A0 35 00 09 1C 13 E6 C9 EF
+    89 2E E4 00 10 3F E4 7A E1 47 AE 14 7B C3 F4 01 
+    C7 AE 14 7A E1 47 A0 A6 71 30 0F 00 09 1C 13 E6
+    C9 F4 31 46 AC 00 10 3F EF AE 14 7A E1 47 AE C3 
+    FC 01 7A E1 47 AE 14 7A F0 
+
+Index部分  ：
+::
+
+                               00 34 63 70 75 5F 6C 
+    6F 61 64 5F 73 68 6F 72 74 2C 68 6F 73 74 3D 73 
+    65 72 76 65 72 30 31 2C 72 65 67 69 6F 6E 3D 75 
+    73 2D 77 65 73 74 23 21 7E 23 76 61 6C 75 65 00 
+    00 02 13 E6 C9 EF 89 2E E4 00 13 E6 C9 EF 89 2E 
+    E4 00 00 00 00 00 00 00 00 05 00 00 00 22 13 E6 
+    C9 F4 31 46 AC 00 13 E6 C9 F4 31 46 AC 00 00 00 
+    00 00 00 00 00 27 00 00 00 22
+   
+    
+00 34 ： 后面的52个字符为key
+
+key内容：
+::
+
+                                     63 70 75 5F 6C 
+    6F 61 64 5F 73 68 6F 72 74 2C 68 6F 73 74 3D 73 
+    65 72 76 65 72 30 31 2C 72 65 67 69 6F 6E 3D 75 
+    73 2D 77 65 73 74 23 21 7E 23 76 61 6C 75 65
+    
+data类型：0x00 
+
+count ： 00 02
+
+后面有两个数据
+
+第一个数据：
+::   
+
+          13 E6 C9 EF 89 2E E4 00 13 E6 C9 EF 89 2E 
+    E4 00 00 00 00 00 00 00 00 05 00 00 00 22
+
+这个时间段（13 E6 C9 EF 89 2E E4 00  - 13 E6 C9 EF 89 2E E4）的数据在5（
+00 00 00 00 00 00 00 00 05）这个地方存，占用34（00 00 00 22）个byte
+    
+第二个数据：    
+::
+
+                                              13 E6 
+    C9 F4 31 46 AC 00 13 E6 C9 F4 31 46 AC 00 00 00 
+    00 00 00 00 00 27 00 00 00 22
+    
+Footer部分 ： 00 00 00 00 00 00 00 49
+    
+
+TSM存储设计可参考如下文件：
+::
+
+    influxdb-1.1.0/tsdb/engine/tsm1/DESIGN.md
+    
+
+* 文件存储器
+
+在替换和删除TSM文件时，它确保TSM文件创建的原子性。
+
+* 压缩规划器
+
+检测那个TSM文件可以压缩，并确保多个并发的压缩互不干扰。
+
+* 压缩器
+
+主要用于文件压缩，优化存储空间。
+
+
+
+* 读写器
+
+每种文件类型（WAL，TSM，tombstones等）都分别拥有自己格式的读写器。
+
+
+
+
+    
