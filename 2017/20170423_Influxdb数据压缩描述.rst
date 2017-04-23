@@ -1,0 +1,108 @@
+influxdb数据压缩
+=================
+
+
+数据压缩可以参考：
+
+https://docs.influxdata.com/influxdb/v1.1/concepts/storage_engine/#compression
+
+
+influxdb根据不同的数据类型会采用不同的压缩算法。
+
+* int
+
+首先使用ZigZag算法进行编码，如果编码后的值小于 (1 << 60 ) - 1，使用simple8b算法；
+
+如果大于该值，不压缩；
+
+* timestamp
+
+排序后使用差分编码算法进行编码，然后使用simple8b算法压缩。
+
+* float
+
+使用 Facebook Gorilla paper提供的浮点数压缩算法
+
+
+* bool
+
+只有1位数据，采用简单的位数据打包策略
+
+* string
+
+采用snappy算法
+
+压缩算法介绍
+^^^^^^^^^^^^^^^^^
+
+ZigZag算法
+-----------
+
+这个算法使用的基础就是认为在大多数情况下，我们使用的数字都是不大的数字。
+小整数对应的ZigZag码字短，大整数对应的ZigZag码字长。
+但是，在特定的场景下，比如，要传输的整数为大整数居多，ZigZag编码的压缩效率就不理想了。
+
+
+实现代码如下：
+
+::
+
+    // ZigZagEncode converts a int64 to a uint64 by zig zagging negative and positive values
+    // across even and odd numbers.  Eg. [0,-1,1,-2] becomes [0, 1, 2, 3]
+    func ZigZagEncode(x int64) uint64 {
+        return uint64(uint64(x<<1) ^ uint64((int64(x) >> 63)))
+    }
+
+    // ZigZagDecode converts a previously zigzag encoded uint64 back to a int64
+    func ZigZagDecode(v uint64) int64 {
+        return int64((v >> 1) ^ uint64((int64(v&1)<<63)>>63))
+    }
+    
+
+simple8b算法
+------------
+该算法是64位算法，实现将多个整型数据压缩到一个64位的存储结构中，
+存储结构中的前4位用于标识Selector的值，后60位用于存储数据，可以压缩0到(1<<60)-1的数字。
+
+使用下表进行编码：
+
+::
+
+    ┌──────────────┬─────────────────────────────────────────────────────────────┐
+    │   Selector   │       0    1   2   3   4   5   6   7  8  9  0 11 12 13 14 15│
+    ├──────────────┼─────────────────────────────────────────────────────────────┤
+    │     Bits     │       0    0   1   2   3   4   5   6  7  8 10 12 15 20 30 60│
+    ├──────────────┼─────────────────────────────────────────────────────────────┤
+    │      N       │     240  120  60  30  20  15  12  10  8  7  6  5  4  3  2  1│
+    ├──────────────┼─────────────────────────────────────────────────────────────┤
+    │   Wasted Bits│      60   60   0   0   0   0  12   0  4  4  0  0  0  0  0  0│
+    └──────────────┴─────────────────────────────────────────────────────────────┘
+
+
+Fackbook Gorilla XOR算法
+------------------------
+第一个值不压缩；
+后面的值是跟第一个值XOR的结果来的，如果结果相同，仅存储一个0；
+如果结果不同，存储XOR后的结果。
+
+
+snappy算法
+------------
+
+以下是Google几年前发布的一组测试数据（《HBase: The Definitive Guide》）：
+::
+
+    Algorithm   % remaining Encoding    Decoding
+    GZIP            13.4%   21 MB/s     118 MB/s
+    LZO             20.5%   135 MB/s    410 MB/s
+    Zippy/Snappy    22.2%   172 MB/s    409 MB/s
+ 
+
+其中：
+
+1）GZIP的压缩率最高，但是它是CPU密集型的，对CPU的消耗比其他算法要多，压缩和解压速度也慢；   
+
+2）LZO的压缩率居中，比GZIP要低一些，但是压缩和解压速度明显要比GZIP快很多，其中解压速度快的更多；   
+
+3）Zippy/Snappy的压缩率最低，而压缩和解压速度要稍微比LZO要快一些。   
+
