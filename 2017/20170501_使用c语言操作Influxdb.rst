@@ -1,17 +1,19 @@
-使用C语言操作Influxdb
+使用C语言操作InfluxDB
 =====================
 
 环境： CentOS6.5_x64         
      
 InfluxDB版本：1.1.0
 
-Influxdb官网暂未提供C语言开发库，但github提供的有：
+InfluxDB官网暂未提供C语言开发库，但github提供的有：
+
 https://github.com/influxdata/influxdb-c
 
-但这个版本比较早了，这里有我自己开发的InfluxDB客户端开发库，直接使用的http api实现，功能比较简单，
-有兴趣的朋友可以加入一起完善。
+但这个版本比较早了，到目前为止不支持0.9及其以后的版本。
+这里有我自己开发的InfluxDB客户端开发库，直接使用的http api实现，功能比较简单， 有兴趣的朋友可以加入一起完善。
 
-github地址：
+github地址： 
+
 https://github.com/mike-zhang/influxdbCApi
     
 原理：   
