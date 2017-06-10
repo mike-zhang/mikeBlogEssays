@@ -1,0 +1,50 @@
+使用go语言解析xml
+====================
+
+操作系统： CentOS 6.9_x64 
+   
+go语言版本： 1.8.3
+
+问题描述
+-----------------------
+
+需要应用程序根据不同的配置文件访问不同的服务器，希望程序启动时可以指定配置文件。
+
+解决方案
+-----------------------
+::
+
+    package main
+
+    import (
+        "os"
+        "fmt"
+    )
+
+    func main() {
+        argsWithProg := os.Args
+        if(len(argsWithProg) < 2) {
+            fmt.Println("usage : ",argsWithProg[0]," configFile")
+            return 
+        }
+        confFile := os.Args[1]
+        fmt.Println(argsWithProg)
+        fmt.Println(confFile)
+    }
+
+运行效果如下：
+::
+
+    [root@local t1]# go build argTest1.go
+    [root@local t1]# ./argTest1
+    usage :  ./argTest1  configFile
+    [root@local t1]# ./argTest1 default.xml
+    [./argTest1 default.xml]
+    default.xml
+    [root@local t1]#
+    
+讨论
+-----------------------
+
+这里只是个简单的示例代码，其它功能请自行扩展。
+
