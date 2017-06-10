@@ -1,0 +1,117 @@
+使用go语言解析xml
+====================
+
+操作系统： CentOS 6.9_x64 
+   
+go语言版本： 1.8.3
+
+问题描述
+----------------
+
+现有一个自动报障程序，如果服务出错会自动给指定人发送邮件，配置文件内容如下（default.xml）：
+
+::
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <config>
+        <smtpServer>smtp.163.com</smtpServer>
+        <smtpPort>25</smtpPort>
+        <sender>user@163.com</sender>
+        <senderPasswd>123456</senderPasswd>
+        <receivers flag="true">
+            <user>Mike_Zhang@live.com</user>
+            <user>test1@qq.com</user>
+        </receivers>
+    </config>  
+
+该配置以config为root标签，有xml text部分（比如smtpServer标签）、嵌套xml（receivers标签）、有xml attribute部分（receivers标签的flag）、类似数组的多行配置（user标签），
+数据类型有字符串和数字两种类型。
+
+
+解决方案
+-----------
+
+::
+
+    package main
+
+    import (
+        "encoding/xml"
+        "fmt"
+        "io/ioutil"
+        "os"
+    )
+
+    type SConfig struct {
+        XMLName    xml.Name `xml:"config"`  // 指定最外层的标签为config
+        SmtpServer string  `xml:"smtpServer"` // 读取smtpServer配置项，并将结果保存到SmtpServer变量中
+        SmtpPort int `xml:"smtpPort"`
+        Sender string `xml:"sender"`
+        SenderPasswd string `xml:"senderPasswd"`
+        Receivers SReceivers `xml:"receivers"`  // 读取receivers标签下的内容，以结构方式获取
+    }
+
+    type SReceivers struct {
+        Flag string `xml:"flag,attr"` // 读取flag属性
+        User []string `xml:"user"`  // 读取user数组
+    }
+
+    func main() {
+        file, err := os.Open("default.xml") // For read access.     
+        if err != nil {
+            fmt.Printf("error: %v", err)
+            return
+        }
+        defer file.Close()
+        data, err := ioutil.ReadAll(file)
+        if err != nil {
+            fmt.Printf("error: %v", err)
+            return
+        }
+        v := SConfig{}
+        err = xml.Unmarshal(data, &v)
+        if err != nil {
+            fmt.Printf("error: %v", err)
+            return
+        }
+
+        fmt.Println(v)
+        fmt.Println("SmtpServer : ",v.SmtpServer)
+        fmt.Println("SmtpPort : ",v.SmtpPort)
+        fmt.Println("Sender : ",v.Sender)
+        fmt.Println("SenderPasswd : ",v.SenderPasswd)
+        fmt.Println("Receivers.Flag : ",v.Receivers.Flag)
+        for i,element := range v.Receivers.User {
+            fmt.Println(i,element)
+        }
+    }
+
+运行效果：
+::
+
+    [root@local t1]# ls
+    default.xml  xmlCnfTest1.go
+    [root@local t1]# go run xmlCnfTest1.go
+    {{ config} smtp.163.com 25 user@163.com 123456 {true [Mike_Zhang@live.com test1@qq.com]}}
+    SmtpServer :  smtp.163.com
+    SmtpPort :  25
+    Sender :  user@163.com
+    SenderPasswd :  123456
+    Receivers.Flag :  true
+    0 Mike_Zhang@live.com
+    1 test1@qq.com
+    [root@local t1]#
+
+    
+讨论
+------------
+
+如果需要直接从字符串解析xml配置，可将如下语句中的data替换即可：
+
+    err = xml.Unmarshal(data, &v)
+
+比如：
+
+	err = xml.Unmarshal([]byte(ConfigContent), &v) // ConfigContent为xml字符串
+    
+
