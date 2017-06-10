@@ -1,0 +1,120 @@
+go1.8之安装配置
+=====================
+
+操作系统： CentOS 6.9_x64    
+
+go语言版本： 1.8.3
+
+说明：  
+ 
+之前学习过go语言（大概是0.9版本），后来更新太快，也没怎么使用，就荒废掉了，今年有项目需要用go开发，重新捡起。
+
+这是我在学习go语言过程中整理的内容，这里记录下，也方便我以后查阅。
+
+
+安装go
+----------------
+
+这里直接安装二进制，其它方式请自行搜索。
+
+1、下载并安装go     
+
+命令如下：
+::
+
+    wget https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz --no-check-certificate
+    tar zxvf go1.8.3.linux-amd64.tar.gz
+    mv go /usr/local/
+
+2、添加环境变量       
+
+vim /etc/profile   
+
+添加如下内容：
+::
+
+    export PATH=$PATH:/usr/local/go/bin
+    export GOROOT=/usr/local/go
+
+使配置生效：
+::
+
+    [root@localhost ~]# source /etc/profile
+    [root@localhost ~]# go version
+    go version go1.8.3 linux/amd64
+    [root@localhost ~]#
+
+使用go
+------------
+
+这里以简单的示例介绍下go语言的编译、运行，更深层次的内容暂不讨论。
+
+文件名： test1.go       
+代码：   
+::
+
+    package main
+
+    import "fmt"
+
+    func main() {
+        fmt.Println("Email : Mike_Zhang@live.com")
+    }
+    
+
+常规编译运行
+^^^^^^^^^^^^
+
+1、通过go build 命令将go源码编译成二进制文件；
+
+2、执行编译好的二进制文件即可。
+
+示例如下：
+::
+
+    [root@localhost src]# go build test1.go
+    [root@localhost src]# ls
+    test1  test1.go
+    [root@localhost src]# ./test1
+    Email : Mike_Zhang@live.com
+    [root@localhost src]#
+
+以脚本方式运行
+^^^^^^^^^^^^^^^^^^
+
+go语言可以直接通过go run直接运行程序，可以借助此特性以脚本方式运行go程序。
+
+方法1：
+::
+
+    [root@localhost src]# go run test1.go
+    Email : Mike_Zhang@live.com
+    [root@localhost src]#
+
+方法2：
+
+在文件头部加入如下代码：
+::
+
+    //usr/bin/env go run $0 "$@"; exit
+
+然后通过chmod赋予可执行权限即可。    
+
+示例如下：
+::
+
+    [root@localhost src]# cat test1.go
+    //usr/bin/env go run $0 "$@"; exit
+
+    package main
+
+    import "fmt"
+
+    func main() {
+            fmt.Println("Email : Mike_Zhang@live.com")
+    }
+
+    [root@localhost src]# chmod a+x test1.go
+    [root@localhost src]# ./test1.go
+    Email : Mike_Zhang@live.com
+    [root@localhost src]#
