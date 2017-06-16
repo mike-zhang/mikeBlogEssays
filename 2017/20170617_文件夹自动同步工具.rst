@@ -1,0 +1,76 @@
+文件夹自动同步工具
+====================
+
+这是我之前开发的文件夹自动同步工具，主要实现开发机和服务器之间的文件夹同步。
+
+项目地址： https://github.com/mike-zhang/autoSync
+
+问题描述
+----------------
+在windows下修改代码，到服务器上去编译，但每次都要通过windscp之类的工具拖拽上去（当然你也可以通过scp命令行的方式）。
+
+每次修改的文件很少，而且可能位于不同的目录，每次都重复覆盖文件的操作感觉比较麻烦，所以开发了这个自动文件夹自动同步工具。
+
+当然这个工具也可以用于两台linux服务器之间的文件夹同步。
+
+工具介绍
+----------------------
+
+配置文件说明：
+::
+
+    host ： 服务器地址
+    sshPort : 服务器ssh端口
+    user ： 用户名
+    password ： 密码
+    localDir ： 需要同步的文件夹
+    remoteDir ： 同步到服务器的文件夹
+    fileExcept ：不同步的文件
+    
+示例代码配置文件：
+::
+
+    <config>
+        <host>127.0.0.1</host>
+        <sshPort>22</sshPort>
+        <user>root</user>
+        <password>123456</password>
+        <localDir>.</localDir>
+        <remoteDir>/tmp/t1</remoteDir>
+        
+        <fileExcept>
+            <file>f1.txt</file>
+            <file>data/f2.txt</file>
+        </fileExcept>
+        
+    </config>  
+
+依赖库：
+
+paramiko ：ssh操作库
+watchdog ：用于监控本地文件夹状态
+
+可以通过pip方式安装，命令如下：
+::
+
+    pip install paramiko
+    pip install watchdog
+
+工具使用示例如下：
+::
+
+    $ python autoSync.py default.xml
+    
+    
+讨论
+---------------
+1、如果想以单独的exe文件共享给朋友该怎么操作？
+    
+可以通过pyinstaller打包为单独的二进制文件，命令如下：
+pyinstaller.py -F autoSync.py
+
+exe位于 autoSync\dist 目录下
+
+pyinstaller地址：https://github.com/pyinstaller/pyinstaller
+
+
