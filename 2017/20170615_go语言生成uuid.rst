@@ -1,0 +1,115 @@
+go语言生成uuid
+====================
+
+操作系统： CentOS 6.9_x64 
+   
+go语言版本： 1.8.3
+
+问题描述
+----------------
+
+golang没有提供生成uuid的接口，但开发中确实需要uuid。
+
+这里把看到的代码记录下，也方便我以后查阅。
+
+
+解决方案
+-----------
+
+示例代码如下：
+::
+
+    package main
+
+    import (
+        "fmt"
+        "sync/atomic"
+        "time"
+    )
+
+    type UUID [16]byte
+
+    var timeBase = time.Date(1582, time.October, 15, 0, 0, 0, 0, time.UTC).Unix()
+    var hardwareAddr []byte
+    var clockSeq uint32
+
+    func TimeUUID() UUID {
+        return FromTime(time.Now())
+    }
+
+    func FromTime(aTime time.Time) UUID {
+        var u UUID
+
+        utcTime := aTime.In(time.UTC)
+        t := uint64(utcTime.Unix()-timeBase)*10000000 + uint64(utcTime.Nanosecond()/100)
+        u[0], u[1], u[2], u[3] = byte(t>>24), byte(t>>16), byte(t>>8), byte(t)
+        u[4], u[5] = byte(t>>40), byte(t>>32)
+        u[6], u[7] = byte(t>>56)&0x0F, byte(t>>48)
+
+        clock := atomic.AddUint32(&clockSeq, 1)
+        u[8] = byte(clock >> 8)
+        u[9] = byte(clock)
+
+        copy(u[10:], hardwareAddr)
+
+        u[6] |= 0x10 // set version to 1 (time based uuid)
+        u[8] &= 0x3F // clear variant
+        u[8] |= 0x80 // set to IETF variant
+
+        return u
+    }
+
+    func (u UUID) String() string {
+        var offsets = [...]int{0, 2, 4, 6, 9, 11, 14, 16, 19, 21, 24, 26, 28, 30, 32, 34}
+        const hexString = "0123456789abcdef"
+        r := make([]byte, 36)
+        for i, b := range u {
+            r[offsets[i]] = hexString[b>>4]
+            r[offsets[i]+1] = hexString[b&0xF]
+        }
+        r[8] = '-'
+        r[13] = '-'
+        r[18] = '-'
+        r[23] = '-'
+        return string(r)
+    }
+
+    func main() {
+        out := TimeUUID()
+        fmt.Printf("%s\n", out.String())
+    }
+
+
+运行效果：
+::
+
+    [root@local t2]# go run uuidTest.go
+    [root@local t2]#
+    3e42d638-5243-11e7-8001-000000000000
+
+    
+讨论
+------------
+当然如果你只是想快速的得到uuid，而且使用的是linux系统，可以直接使用uuidgen命令来获取。
+
+示例代码如下：
+::
+
+    package main
+
+    import (
+        "fmt"
+        "log"
+        "os/exec"
+    )
+
+    //run in linux
+    func main() {
+        out, err := exec.Command("uuidgen").Output()
+        if err != nil {
+            log.Fatal(err)
+        }
+        fmt.Printf("%s", out)
+    }
+
+
