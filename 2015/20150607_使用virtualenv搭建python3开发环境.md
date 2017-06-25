@@ -23,6 +23,8 @@
 注意：
 这里我们使用的是make altinstall，如果使用make install，你将会看到在系统中有两个不同版本的Python在/usr/bin/目录中。这将会导致很多问题，而且不好处理。 
 
+如果提示找不到so文件，可以添加以下变量：export LD_LIBRARY_PATH=/usr/local/lib
+
 ## 搭建python3开发环境
 
 1、安装virtualenv，可以通过pip进行安装，命令如下：
