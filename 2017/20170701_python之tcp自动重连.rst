@@ -61,9 +61,6 @@ python语言版本： 2.7.13
 
         ThreadedServer('',port_num).listen()
 
-        
-https://github.com/mike-zhang/pyExamples/blob/master/socketRelate/tcpServer1_multithread.py
-
 解决方案
 -----------
 
