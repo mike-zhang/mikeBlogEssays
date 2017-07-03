@@ -1,4 +1,4 @@
-python操作mysql数据库
+使用python操作mysql数据库
 ===============================
 
 这是我之前使用mysql时用到的一些库及开发的工具，这里记录下，也方便我查阅。
@@ -7,7 +7,7 @@ python版本： 2.7.13
 
 mysql版本： 5.5.36
 
-使用python访问mysql数据库
+几个python库
 --------------------------
 
 1、mysql-connector-python
@@ -51,7 +51,7 @@ pip install PyMySQL
 
 https://github.com/mike-zhang/pyExamples/blob/master/databaseRelate/mysqlOpt/pymysql_Opt/test1.py
 
-使用python操作mysql数据库的几个工具
+几个工具
 ---------------------------------------
 
 以下几个工具均使用MySQL-python库开发，需要提前安装该库。
