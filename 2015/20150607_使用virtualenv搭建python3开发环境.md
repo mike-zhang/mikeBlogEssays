@@ -25,6 +25,8 @@
 
 如果提示找不到so文件，可以添加以下变量：export LD_LIBRARY_PATH=/usr/local/lib
 
+安装其它版本的python可从官网下载： https://www.python.org/
+
 ## 搭建python3开发环境
 
 1、安装virtualenv，可以通过pip进行安装，命令如下：
