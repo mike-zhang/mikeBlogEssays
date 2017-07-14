@@ -1,0 +1,95 @@
+centos6.9下安装PostgreSQL
+==================================
+
+操作系统：CentOS6.9_x64
+
+
+安装数据库
+------------------------------
+
+使用如下命令：
+::
+
+    yum install postgresql-server -y 
+
+**设置开机启动：**
+::
+
+    chkconfig postgresql on
+
+**启动数据库：**
+::
+    
+    service postgresql start
+    
+    
+安装后，默认生成一个名为postgres的数据库和一个名为postgres的数据库用户。这里需要注意的是，同时还生成了一个名为postgres的Linux系统用户。  
+
+配置数据库
+-----------------------
+**初始化数据库**
+::
+
+    service postgresql initdb
+
+**添加新用户和新数据库**
+::
+
+    adduser psqladmin
+
+    su - postgres
+
+    CREATE USER useradmin WITH PASSWORD '123456';
+
+    CREATE DATABASE testdb OWNER useradmin;
+
+    GRANT ALL PRIVILEGES ON DATABASE testdb to useradmin;
+
+
+**修改 postgres 的数据库密码**
+::
+
+    \password postgres
+
+
+**开启远程访问：**
+   
+::
+
+    cd /var/lib/pgsql/data/
+   
+postgresql默认情况下，远程访问不能成功，如果需要允许远程访问，需要修改两个配置文件，说明如下：
+
+1. postgresql.conf
+
+将该文件中的 listen_addresses 项值设定为“*”，在9.0 Windows版中，该项配置已经是“*”无需修改。
+
+2. pg_hba.conf
+
+在该配置文件的host all all 127.0.0.1/32 md5行下添加以下配置，或者直接将这一行修改为以下配置
+
+    host    all    all    0.0.0.0/0    md5
+
+如果不希望允许所有IP远程访问，则可以将上述配置项中的0.0.0.0设定为特定的IP值。
+
+使用数据库
+----------------------------
+    
+sql语句示例代码：
+
+::   
+
+    create table students (
+        id bigserial primary key,
+        name varchar(20) NOT NULL  
+    );
+
+    insert into students values (1,'stu1');
+    select * from students ;
+    drop table students ;
+    
+
+python 访问示例代码：
+
+https://github.com/mike-zhang/pyExamples/blob/master/databaseRelate/psqlOpt/psqlTest1.py
+
