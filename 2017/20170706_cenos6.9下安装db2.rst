@@ -1,0 +1,108 @@
+CentOS 6.9 下安装DB2
+=================================
+
+操作系统：CentOS6.9_x64
+
+DB2安装文件: db2_v101_linuxx64_expc.tar.gz
+
+安装数据库
+----------------------------
+::
+
+    tar zxvf db2_v101_linuxx64_expc.tar.gz
+    cd expc/
+    ./db2_install
+
+选择默认安装路径 : yes
+
+配置数据库
+----------------------------
+
+创建3个用户组 
+::
+
+    groupadd -g 901 db2iadm1 
+    groupadd -g 902 db2fadm1 
+    groupadd -g 903 db2dadm1
+
+创建3个用户  
+::
+
+    useradd -g db2iadm1 -u 101 -d  /home/db2inst1 -m  db2inst1 
+    useradd -g db2fadm1 -u 102 -d  /home/db2fenc1 -m  db2fenc1  
+    useradd -g db2dadm1 -u 103 -d  /home/db2dasusr1 -m  db2dasusr1 
+
+添加3个用户密码 
+::
+
+    passwd db2inst1
+    passwd db2fenc1
+    passwd db2dasusr1
+
+检查用户组和用户是否创建成功 
+::
+
+    cat /etc/group | grep db2 
+    cat /etc/passwd | grep db2
+    
+创建实例 
+::
+
+    cd /opt/ibm/db2/V10.1/instance
+    ./dascrt -u db2dasusr1
+    ./db2icrt -a server -u db2fenc1 db2inst1
+    
+    
+配置db2自启动 
+::
+
+    cd /opt/ibm/db2/V10.1/instance    
+    ./db2iauto -on db2inst1 
+    
+配置db2网络服务端口
+
+    su - db2inst1
+    db2 update dbm cfg using SVCENAME 50000 
+    
+   
+修改DB2连接方式为TCP/IP 
+
+    db2set DB2COMM=TCPIP  
+
+使用数据库
+----------------------------
+
+启动数据库
+    
+    su - db2inst1
+    db2start    
+    
+创建数据库
+
+    db2 create db testdb using codeset UTF-8 territory CN pagesize 8192
+    
+连接到数据库：    
+    
+    db2 connect to testdb
+
+
+显示连接    
+    
+    db2 list applications
+     
+    
+sql测试代码：
+
+::
+
+    create table tb1( id integer not null primary key,username varchar(200),password varchar(200));
+    insert into tb1(id,username,password) values(188,'stevenjohn','stevenanthony')  ;
+    select * from tb1;
+
+    drop table tb1;
+
+python测试代码：
+    
+https://github.com/mike-zhang/pyExamples/blob/master/databaseRelate/db2Opt/db2Test1.py
+
+
