@@ -39,6 +39,8 @@ centos6.9下安装PostgreSQL
     adduser psqladmin
 
     su - postgres
+    
+    psql
 
     CREATE USER useradmin WITH PASSWORD '123456';
 
@@ -93,4 +95,7 @@ sql语句示例代码：
 python 访问示例代码：
 
 https://github.com/mike-zhang/pyExamples/blob/master/databaseRelate/psqlOpt/psqlTest1.py
+
+centos6.9自带的python安装pyscopg2库 ： yum install python-psycopg2
+
 
