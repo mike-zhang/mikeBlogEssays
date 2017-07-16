@@ -17,6 +17,11 @@ centos6.9下安装PostgreSQL
 
     chkconfig postgresql on
 
+**初始化数据库**
+::
+
+    service postgresql initdb
+    
 **启动数据库：**
 ::
     
@@ -27,10 +32,6 @@ centos6.9下安装PostgreSQL
 
 配置数据库
 -----------------------
-**初始化数据库**
-::
-
-    service postgresql initdb
 
 **添加新用户和新数据库**
 ::
