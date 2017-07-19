@@ -1,0 +1,42 @@
+centos6.9下安装python notebook
+==================================
+
+操作系统：CentOS6.9_x64      
+
+python版本 : python2.7.13
+
+添加低权限新用户： 
+::
+
+    useradd mike
+    su mike
+    
+使用virtualenv安装python2.7环境
+----------------------------------
+
+可以参考我之前写的博文： http://www.cnblogs.com/MikeZhang/p/virtualenvPython_20150607.html
+
+安装notebook
+-----------------------
+
+启动virtualenv环境：
+::
+
+    source  py27env/bin/activate
+    
+安装jupyter ：
+::
+
+    pip install jupyter
+    
+启动notebook ：
+::
+    
+    jupyter notebook --no-browser --ip=0.0.0.0 --port 9999 
+
+根据控制台提示的url进行访问，把0.0.0.0换成实际ip地址,示例格式：
+
+http://192.168.1.100:9999/?token=98f049b1dc4a2da69606b5b7e0fe45e0f0bde22e3a155450
+
+
+    
