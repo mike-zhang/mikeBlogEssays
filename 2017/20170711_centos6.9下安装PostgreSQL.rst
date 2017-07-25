@@ -35,7 +35,7 @@ CentOS6.9_x64 默认安装的是8.4版本的psql，如果需要其它版本，�
 
 https://www.postgresql.org/download/linux/redhat/
 
-比如CentOS6.9_x64 ：
+这里附上CentOS6.9_x64下的安装脚本 ：
 ::
 
     yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-6-x86_64/pgdg-centos96-9.6-3.noarch.rpm
