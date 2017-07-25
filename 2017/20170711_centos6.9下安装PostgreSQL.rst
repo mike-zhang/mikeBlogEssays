@@ -3,6 +3,7 @@ centos6.9下安装PostgreSQL
 
 操作系统：CentOS6.9_x64
 
+PostgreSQL官方网址： https://www.postgresql.org/
 
 安装数据库
 ------------------------------
@@ -29,6 +30,22 @@ centos6.9下安装PostgreSQL
     
     
 安装后，默认生成一个名为postgres的数据库和一个名为postgres的数据库用户。这里需要注意的是，同时还生成了一个名为postgres的Linux系统用户。  
+
+CentOS6.9_x64 默认安装的是8.4版本的psql，如果需要其它版本，可以参考官方文档：
+
+https://www.postgresql.org/download/linux/redhat/
+
+比如CentOS6.9_x64 ：
+::
+
+    yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-6-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+    yum install postgresql96
+    yum install postgresql96-server
+    
+    service postgresql-9.6 initdb
+    chkconfig postgresql-9.6 on
+    service postgresql-9.6 start
+
 
 配置数据库
 -----------------------
