@@ -95,7 +95,10 @@ postgresql默认情况下，远程访问不能成功，如果需要允许远程�
 使用数据库
 ----------------------------
     
-sql语句示例代码：
+sql语句示例代码
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+使用public schema：
 
 ::   
 
@@ -108,8 +111,23 @@ sql语句示例代码：
     select * from students ;
     drop table students ;
     
+使用自定义schema ：
+::
+    
+    create schema my_schema;
 
-python 访问示例代码：
+    create table my_schema.students (
+        id bigserial primary key,
+        name varchar(20) NOT NULL  
+    );
+
+    insert into my_schema.students values (1,'stu1');
+
+    select * from my_schema.students ;    
+    
+
+python 访问示例代码
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 https://github.com/mike-zhang/pyExamples/blob/master/databaseRelate/psqlOpt/psqlTest1.py
 
