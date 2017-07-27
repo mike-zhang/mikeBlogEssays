@@ -38,5 +38,14 @@ python版本 : python2.7.13
 
 http://192.168.1.100:9999/?token=98f049b1dc4a2da69606b5b7e0fe45e0f0bde22e3a155450
 
+如果遇到类似下面的错误：
+::
 
+    OSError: [Errno 13] Permission denied: '/run/user/0/jupyter'
+    
+设置如下环境变量：
+::
+    
+    export XDG_RUNTIME_DIR=""
+    
     
