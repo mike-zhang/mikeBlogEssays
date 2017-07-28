@@ -281,8 +281,8 @@ https://github.com/mike-zhang/pyExamples/blob/master/algorithm/LinearRegression/
     
 
 ​
-使用tensorflow解决多元线性回归问题
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+使用tensorflow解决多元线性回归问题          
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^            
 
 待更新
 
