@@ -1,11 +1,11 @@
-CentOS 6.9 ÏÂ°²×°DB2
+CentOS 6.9 ä¸‹å®‰è£…DB2
 =================================
 
-²Ù×÷ÏµÍ³£ºCentOS6.9_x64
+æ“ä½œç³»ç»Ÿï¼šCentOS6.9_x64
 
-DB2°²×°ÎÄ¼ş: db2_v101_linuxx64_expc.tar.gz
+DB2å®‰è£…æ–‡ä»¶: db2_v101_linuxx64_expc.tar.gz
 
-°²×°Êı¾İ¿â
+å®‰è£…æ•°æ®åº“
 ----------------------------
 ::
 
@@ -13,39 +13,39 @@ DB2°²×°ÎÄ¼ş: db2_v101_linuxx64_expc.tar.gz
     cd expc/
     ./db2_install
 
-Ñ¡ÔñÄ¬ÈÏ°²×°Â·¾¶ : yes
+é€‰æ‹©é»˜è®¤å®‰è£…è·¯å¾„ : yes
 
-ÅäÖÃÊı¾İ¿â
+é…ç½®æ•°æ®åº“
 ----------------------------
 
-´´½¨3¸öÓÃ»§×é 
+åˆ›å»º3ä¸ªç”¨æˆ·ç»„ 
 ::
 
     groupadd -g 901 db2iadm1 
     groupadd -g 902 db2fadm1 
     groupadd -g 903 db2dadm1
 
-´´½¨3¸öÓÃ»§  
+åˆ›å»º3ä¸ªç”¨æˆ·  
 ::
 
     useradd -g db2iadm1 -u 101 -d  /home/db2inst1 -m  db2inst1 
     useradd -g db2fadm1 -u 102 -d  /home/db2fenc1 -m  db2fenc1  
     useradd -g db2dadm1 -u 103 -d  /home/db2dasusr1 -m  db2dasusr1 
 
-Ìí¼Ó3¸öÓÃ»§ÃÜÂë 
+æ·»åŠ 3ä¸ªç”¨æˆ·å¯†ç  
 ::
 
     passwd db2inst1
     passwd db2fenc1
     passwd db2dasusr1
 
-¼ì²éÓÃ»§×éºÍÓÃ»§ÊÇ·ñ´´½¨³É¹¦ 
+æ£€æŸ¥ç”¨æˆ·ç»„å’Œç”¨æˆ·æ˜¯å¦åˆ›å»ºæˆåŠŸ 
 ::
 
     cat /etc/group | grep db2 
     cat /etc/passwd | grep db2
     
-´´½¨ÊµÀı 
+åˆ›å»ºå®ä¾‹ 
 ::
 
     cd /opt/ibm/db2/V10.1/instance
@@ -53,45 +53,46 @@ DB2°²×°ÎÄ¼ş: db2_v101_linuxx64_expc.tar.gz
     ./db2icrt -a server -u db2fenc1 db2inst1
     
     
-ÅäÖÃdb2×ÔÆô¶¯ 
+é…ç½®db2è‡ªå¯åŠ¨ 
 ::
 
     cd /opt/ibm/db2/V10.1/instance    
     ./db2iauto -on db2inst1 
     
-ÅäÖÃdb2ÍøÂç·şÎñ¶Ë¿Ú
+é…ç½®db2ç½‘ç»œæœåŠ¡ç«¯å£
 
     su - db2inst1
     db2 update dbm cfg using SVCENAME 50000 
     
    
-ĞŞ¸ÄDB2Á¬½Ó·½Ê½ÎªTCP/IP 
+ä¿®æ”¹DB2è¿æ¥æ–¹å¼ä¸ºTCP/IP 
 
     db2set DB2COMM=TCPIP  
 
-Ê¹ÓÃÊı¾İ¿â
+ä½¿ç”¨æ•°æ®åº“
 ----------------------------
 
-Æô¶¯Êı¾İ¿â
-    
-    su - db2inst1
+å¯åŠ¨æ•°æ®åº“
+::
+
+    su - db2inst1    
     db2start    
     
-´´½¨Êı¾İ¿â
+åˆ›å»ºæ•°æ®åº“
 
     db2 create db testdb using codeset UTF-8 territory CN pagesize 8192
     
-Á¬½Óµ½Êı¾İ¿â£º    
+è¿æ¥åˆ°æ•°æ®åº“ï¼š    
     
     db2 connect to testdb
 
 
-ÏÔÊ¾Á¬½Ó    
+æ˜¾ç¤ºè¿æ¥    
     
     db2 list applications
      
     
-sql²âÊÔ´úÂë£º
+sqlæµ‹è¯•ä»£ç ï¼š
 
 ::
 
@@ -101,7 +102,7 @@ sql²âÊÔ´úÂë£º
 
     drop table tb1;
 
-python²âÊÔ´úÂë£º
+pythonæµ‹è¯•ä»£ç ï¼š
     
 https://github.com/mike-zhang/pyExamples/blob/master/databaseRelate/db2Opt/db2Test1.py
 
