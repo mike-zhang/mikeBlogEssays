@@ -38,7 +38,11 @@ pytorch版本: 0.1.12_2
 简单地预测商品价格、成本评估等
 
 
-使用sklearn解决一元线性回归问题的示例代码：
+使用sklearn解决一元线性回归问题
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+示例代码：
+
 ::
 
     #! /usr/bin/env python
@@ -74,7 +78,10 @@ https://github.com/mike-zhang/pyExamples/blob/master/algorithm/LinearRegression/
 
 .. image:: images/20170728.1.1_lr_2.png
 
-使用tensorflow解决一元线性回归问题的示例代码：
+使用tensorflow解决一元线性回归问题
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+示例代码：
 
 ::
 
@@ -200,7 +207,10 @@ e 为随机误差项
 Y = 1 + 2 * X1 + 3 * X2 + 0.1
 
 
-使用sklearn解决多元线性回归问题的示例代码：
+使用sklearn解决多元线性回归问题
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+示例代码：
 
 ::
 
@@ -271,6 +281,11 @@ https://github.com/mike-zhang/pyExamples/blob/master/algorithm/LinearRegression/
     
 
 ​
+使用tensorflow解决多元线性回归问题
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+待更新
+
 
 
 
