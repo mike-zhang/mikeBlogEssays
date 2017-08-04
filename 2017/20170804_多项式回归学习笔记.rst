@@ -107,7 +107,6 @@ y = a0 + a1 * x + a2 * (x**2) + a3 * (x**3) + e
 
     #! /usr/bin/env python
     #-*- coding:utf-8 -*-
-
     # 多项式回归
     import matplotlib.pyplot as plt
     import numpy as np
@@ -158,6 +157,9 @@ y = a0 + a1 * x + a2 * (x**2) + a3 * (x**3) + e
 示例代码如下：
 ::
 
+    #! /usr/bin/env python
+    #-*- coding:utf-8 -*-
+    
     import tensorflow as tf
     import numpy as np
     import matplotlib.pyplot as plt
