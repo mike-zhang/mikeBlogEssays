@@ -50,7 +50,19 @@
 3.1、在虚拟环境中安装ipython 
 
     pip install ipython 
+    
+如果安装过程中提示如下错误：
 
+    Can't connect to HTTPS URL because the SSL module is not available. - skipping
+
+请安装以下库:
+    
+    yum install openssl-devel
+    
+然后重新编译安装Python：
+    
+    ./configure --prefix=/usr/local &&  make && make altinstall 
+    
 3.2、在虚拟环境中启动ipython： 
 
     ipython 
