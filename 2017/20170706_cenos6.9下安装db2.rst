@@ -60,12 +60,14 @@ DB2安装文件: db2_v101_linuxx64_expc.tar.gz
     ./db2iauto -on db2inst1 
     
 配置db2网络服务端口
+::
 
     su - db2inst1
     db2 update dbm cfg using SVCENAME 50000 
     
    
 修改DB2连接方式为TCP/IP 
+::
 
     db2set DB2COMM=TCPIP  
 
