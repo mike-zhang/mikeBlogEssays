@@ -108,7 +108,9 @@ postgresql默认情况下，远程访问不能成功，如果需要允许远程�
 sql语句示例代码
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
 ::
+
     su - postgres 
     psql
     \c mikedb
