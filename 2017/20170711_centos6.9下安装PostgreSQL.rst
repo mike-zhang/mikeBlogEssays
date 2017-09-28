@@ -113,7 +113,7 @@ sql语句示例代码
 
     su - postgres 
     psql
-    \c mikedb
+    \c testdb 
     
 
 使用public schema：
