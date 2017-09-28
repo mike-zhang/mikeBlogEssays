@@ -65,6 +65,16 @@ https://www.postgresql.org/download/linux/redhat/
 
     GRANT ALL PRIVILEGES ON DATABASE testdb to useradmin;
 
+显示用户：
+::
+    
+    \du    
+
+退出：
+::
+
+    \q
+    
 
 **修改 postgres 的数据库密码**
 ::
@@ -98,6 +108,12 @@ postgresql默认情况下，远程访问不能成功，如果需要允许远程�
 sql语句示例代码
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+::
+    su - postgres 
+    psql
+    \c mikedb
+    
+
 使用public schema：
 
 ::   
@@ -115,6 +131,8 @@ sql语句示例代码
 ::
     
     create schema my_schema;
+    
+    select schema_name from information_schema.schemata;
 
     create table my_schema.students (
         id bigserial primary key,
