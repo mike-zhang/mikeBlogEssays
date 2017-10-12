@@ -23,7 +23,7 @@
 注意：
 这里我们使用的是make altinstall，如果使用make install，你将会看到在系统中有两个不同版本的Python在/usr/bin/目录中。这将会导致很多问题，而且不好处理。 
 
-如果提示找不到so文件，可以添加以下变量：export LD_LIBRARY_PATH=/usr/local/lib
+如果提示找不到so文件，可以添加以下变量：export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 
 安装其它版本的python可从官网下载： https://www.python.org/
 
