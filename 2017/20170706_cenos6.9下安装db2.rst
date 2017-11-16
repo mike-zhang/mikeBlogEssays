@@ -1,11 +1,11 @@
-CentOS 6.9 ä¸‹å®‰è£…DB2
+CentOS 6.9 ÏÂ°²×°DB2
 =================================
 
-æ“ä½œç³»ç»Ÿï¼šCentOS6.9_x64
+²Ù×÷ÏµÍ³£ºCentOS6.9_x64
 
-DB2å®‰è£…æ–‡ä»¶: db2_v101_linuxx64_expc.tar.gz
+DB2°²×°ÎÄ¼ş: db2_v101_linuxx64_expc.tar.gz
 
-å®‰è£…æ•°æ®åº“
+°²×°Êı¾İ¿â
 ----------------------------
 ::
 
@@ -13,39 +13,39 @@ DB2å®‰è£…æ–‡ä»¶: db2_v101_linuxx64_expc.tar.gz
     cd expc/
     ./db2_install
 
-é€‰æ‹©é»˜è®¤å®‰è£…è·¯å¾„ : yes
+Ñ¡ÔñÄ¬ÈÏ°²×°Â·¾¶ : yes
 
-é…ç½®æ•°æ®åº“
+ÅäÖÃÊı¾İ¿â
 ----------------------------
 
-åˆ›å»º3ä¸ªç”¨æˆ·ç»„ 
+´´½¨3¸öÓÃ»§×é 
 ::
 
     groupadd -g 901 db2iadm1 
     groupadd -g 902 db2fadm1 
     groupadd -g 903 db2dadm1
 
-åˆ›å»º3ä¸ªç”¨æˆ·  
+´´½¨3¸öÓÃ»§  
 ::
 
     useradd -g db2iadm1 -u 101 -d  /home/db2inst1 -m  db2inst1 
     useradd -g db2fadm1 -u 102 -d  /home/db2fenc1 -m  db2fenc1  
     useradd -g db2dadm1 -u 103 -d  /home/db2dasusr1 -m  db2dasusr1 
 
-æ·»åŠ 3ä¸ªç”¨æˆ·å¯†ç  
+Ìí¼Ó3¸öÓÃ»§ÃÜÂë 
 ::
 
     passwd db2inst1
     passwd db2fenc1
     passwd db2dasusr1
 
-æ£€æŸ¥ç”¨æˆ·ç»„å’Œç”¨æˆ·æ˜¯å¦åˆ›å»ºæˆåŠŸ 
+¼ì²éÓÃ»§×éºÍÓÃ»§ÊÇ·ñ´´½¨³É¹¦ 
 ::
 
     cat /etc/group | grep db2 
     cat /etc/passwd | grep db2
     
-åˆ›å»ºå®ä¾‹ 
+´´½¨ÊµÀı 
 ::
 
     cd /opt/ibm/db2/V10.1/instance
@@ -53,48 +53,50 @@ DB2å®‰è£…æ–‡ä»¶: db2_v101_linuxx64_expc.tar.gz
     ./db2icrt -a server -u db2fenc1 db2inst1
     
     
-é…ç½®db2è‡ªå¯åŠ¨ 
+ÅäÖÃdb2×ÔÆô¶¯ 
 ::
 
     cd /opt/ibm/db2/V10.1/instance    
     ./db2iauto -on db2inst1 
     
-é…ç½®db2ç½‘ç»œæœåŠ¡ç«¯å£
+Èç¹ûÉÏÊö·½·¨²»ÄÜÊµÏÖ¿ª»úÆô¶¯£¬¿ÉÒÔ³¢ÊÔÔÚ/etc/rc.localÖĞÌí¼ÓÈçÏÂÄÚÈİ£º
 ::
+
+    su db2inst1 -c '/home/db2inst1/sqllib/adm/db2start'
+    
+ÅäÖÃdb2ÍøÂç·şÎñ¶Ë¿Ú
 
     su - db2inst1
     db2 update dbm cfg using SVCENAME 50000 
     
    
-ä¿®æ”¹DB2è¿æ¥æ–¹å¼ä¸ºTCP/IP 
-::
+ĞŞ¸ÄDB2Á¬½Ó·½Ê½ÎªTCP/IP 
 
     db2set DB2COMM=TCPIP  
 
-ä½¿ç”¨æ•°æ®åº“
+Ê¹ÓÃÊı¾İ¿â
 ----------------------------
 
-å¯åŠ¨æ•°æ®åº“
-::
-
-    su - db2inst1    
+Æô¶¯Êı¾İ¿â
+    
+    su - db2inst1
     db2start    
     
-åˆ›å»ºæ•°æ®åº“
+´´½¨Êı¾İ¿â
 
     db2 create db testdb using codeset UTF-8 territory CN pagesize 8192
     
-è¿æ¥åˆ°æ•°æ®åº“ï¼š    
+Á¬½Óµ½Êı¾İ¿â£º    
     
     db2 connect to testdb
 
 
-æ˜¾ç¤ºè¿æ¥    
+ÏÔÊ¾Á¬½Ó    
     
     db2 list applications
      
     
-sqlæµ‹è¯•ä»£ç ï¼š
+sql²âÊÔ´úÂë£º
 
 ::
 
@@ -104,7 +106,7 @@ sqlæµ‹è¯•ä»£ç ï¼š
 
     drop table tb1;
 
-pythonæµ‹è¯•ä»£ç ï¼š
+python²âÊÔ´úÂë£º
     
 https://github.com/mike-zhang/pyExamples/blob/master/databaseRelate/db2Opt/db2Test1.py
 
