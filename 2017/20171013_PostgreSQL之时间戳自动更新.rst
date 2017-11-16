@@ -62,7 +62,8 @@ PostgreSQL执行Insert语句时，自动填入时间的功能可以在创建表�
     select * from ts;
     -- delete from ts;
 
-
+    
+注意: 以上代码在pgAdmin 4 v1客户端测试通过，使用DbVisualizer工具执行上述代码会报错。
 
 
 
