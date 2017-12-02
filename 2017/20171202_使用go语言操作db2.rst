@@ -1,0 +1,159 @@
+使用go语言操作db2
+==================================
+
+操作系统 ： CentOS7.3.1611_x64     
+go语言版本：1.8.3 linux/amd64
+db2版本： db2_v101_linuxx64_expc
+    
+
+问题描述
+------------------------------------
+
+怎么使用go语言在CentOS环境下操作db2数据库？
+
+
+解决方案
+-------------------------------------
+
+go语言操作数据库相关信息可以参考如下链接：
+
+https://github.com/golang/go/wiki/SQLDrivers
+
+
+使用db2cli
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+db2cli地址： https://bitbucket.org/phiggins/go-db2-cli/src
+
+下载源码，并将源码放到如下路径：
+
+    /usr/local/go/src/bitbucket.org/phiggins/go-db2-cli
+
+::
+    
+    [root@host37 go-db2-cli]# pwd
+    /usr/local/go/src/bitbucket.org/phiggins/go-db2-cli
+    [root@host37 go-db2-cli]# ls
+    LICENSE  mgodbc.go  README.md
+    [root@host37 go-db2-cli]#
+    
+
+这里直接使用bitbucket提供的示例代码 (db2test.go)：
+
+::
+
+    package main
+
+    import (
+        _ "bitbucket.org/phiggins/go-db2-cli"
+        "database/sql"
+        "flag"
+        "fmt"
+        "os"
+        "time"
+    )
+
+    var (
+        connStr = flag.String("conn", "", "connection string to use")
+        repeat  = flag.Uint("repeat", 1, "number of times to repeat query")
+    )
+
+    func usage() {
+        fmt.Fprintf(os.Stderr, `usage: %s [options]
+
+    %s connects to DB2 and executes a simple SQL statement a configurable
+    number of times.
+
+    Here is a sample connection string:
+
+    DATABASE=MYDBNAME; HOSTNAME=localhost; PORT=60000; PROTOCOL=TCPIP; UID=username; PWD=password;
+    `, os.Args[0], os.Args[0])
+        flag.PrintDefaults()
+        os.Exit(1)
+    }
+
+    func execQuery(st *sql.Stmt) error {
+        rows, err := st.Query()
+        if err != nil {
+            return err
+        }
+        defer rows.Close()
+        for rows.Next() {
+            var t time.Time
+            err = rows.Scan(&t)
+            if err != nil {
+                return err
+            }
+            fmt.Printf("Time: %v\n", t)
+        }
+        return rows.Err()
+    }
+
+    func dbOperations() error {
+        db, err := sql.Open("db2-cli", *connStr)
+        if err != nil {
+            return err
+        }
+        defer db.Close()
+        st, err := db.Prepare("select current timestamp from sysibm.sysdummy1")
+        if err != nil {
+            return err
+        }
+        defer st.Close()
+
+        for i := 0; i < int(*repeat); i++ {
+            err = execQuery(st)
+            if err != nil {
+                return err
+            }
+        }
+        return nil
+    }
+
+    func main() {
+        flag.Usage = usage
+        flag.Parse()
+        if *connStr == "" {
+            fmt.Fprintln(os.Stderr, "-conn is required")
+            flag.Usage()
+        }
+
+        if err := dbOperations(); err != nil {
+            fmt.Fprintln(os.Stderr, err)
+        }
+    }
+
+::
+
+    [root@host37 db2Test]# ls
+    build.sh  db2Test.go  run.sh
+    [root@host37 db2Test]# ./build.sh
+    [root@host37 db2Test]# ./run.sh
+    Time: 2017-09-25 22:41:21.701142 +0000 UTC
+    [root@host37 db2Test]#
+
+build.sh :
+
+::
+    
+    #!/bin/bash
+
+    DB2HOME=/home/db2inst1/sqllib
+    export CGO_LDFLAGS=-L$DB2HOME/lib
+    export CGO_CFLAGS=-I$DB2HOME/include
+
+    go build db2Test.go
+
+run.sh  :
+    
+    #! /bin/bash
+
+    DB2HOME=/home/db2inst1/sqllib
+    export LD_LIBRARY_PATH=$DB2HOME/lib
+
+    ./db2Test -conn 'DATABASE=testdb; HOSTNAME=127.0.0.1; PORT=50000; PROTOCOL=TCPIP; UID=db2inst1; PWD=123456;'
+
+
+
+
+    
