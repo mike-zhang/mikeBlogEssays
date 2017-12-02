@@ -1,8 +1,10 @@
 使用go语言操作db2
 ==================================
 
-操作系统 ： CentOS7.3.1611_x64     
+操作系统 ： CentOS7.3.1611_x64   
+  
 go语言版本：1.8.3 linux/amd64
+
 db2版本： db2_v101_linuxx64_expc
     
 
@@ -31,11 +33,11 @@ db2cli地址： https://bitbucket.org/phiggins/go-db2-cli/src
 
 ::
     
-    [root@host37 go-db2-cli]# pwd
+    [root@localhost go-db2-cli]# pwd
     /usr/local/go/src/bitbucket.org/phiggins/go-db2-cli
-    [root@host37 go-db2-cli]# ls
+    [root@localhost go-db2-cli]# ls
     LICENSE  mgodbc.go  README.md
-    [root@host37 go-db2-cli]#
+    [root@localhost go-db2-cli]#
     
 
 这里直接使用bitbucket提供的示例代码 (db2test.go)：
@@ -125,12 +127,12 @@ db2cli地址： https://bitbucket.org/phiggins/go-db2-cli/src
 
 ::
 
-    [root@host37 db2Test]# ls
+    [root@localhost db2Test]# ls
     build.sh  db2Test.go  run.sh
-    [root@host37 db2Test]# ./build.sh
-    [root@host37 db2Test]# ./run.sh
+    [root@localhost db2Test]# ./build.sh
+    [root@localhost db2Test]# ./run.sh
     Time: 2017-09-25 22:41:21.701142 +0000 UTC
-    [root@host37 db2Test]#
+    [root@localhost db2Test]#
 
 build.sh :
 
@@ -145,6 +147,8 @@ build.sh :
     go build db2Test.go
 
 run.sh  :
+
+::
     
     #! /bin/bash
 
