@@ -1,0 +1,69 @@
+从源码编译InfluxDB
+==================================
+
+操作系统 ： CentOS7.3.1611_x64
+
+go语言版本：1.8.3 linux/amd64
+ 
+  
+go语言安装参考：
+http://www.cnblogs.com/MikeZhang/p/InstallGolangInLinux20170610.html
+
+首先安装git：
+::
+
+    yum install git -y
+
+设置GOPATH:
+::
+    
+    mkdir -p /root/dev/golib
+    cd /root/dev/golib
+    mkdir src pkg bin
+    export GOPATH=/root/dev/golib
+
+下载源码：
+::
+
+    go get github.com/influxdata/influxdb
+
+获取依赖库：
+::
+
+    cd /root/dev/golib/src/github.com/influxdata/
+    go get ./...
+
+或者使用代理：
+::
+
+    http_proxy=127.0.0.1:1080 go get ./...
+  
+编译InfluxDB服务器程序：
+::
+  
+    cd influxdb/cmd/influxd
+    go get github.com/kimor79/gollectd
+    go get github.com/rakyll/statik/fs
+    go get golang.org/x/crypto/bcrypt
+
+    go build
+
+influxd可执行文件即为服务器程序
+
+编译InfluxDB客户端程序：
+::
+
+    cd ..
+    cd influx
+    go get golang.org/x/crypto/ssh/terminal
+    go build
+
+influx即为控制台终端程序
+    
+
+    
+    
+    
+    
+      
+
