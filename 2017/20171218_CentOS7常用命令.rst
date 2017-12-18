@@ -1,0 +1,64 @@
+CentOS7常用命令
+==================================
+
+操作系统 ： CentOS7.3.1611_x64   
+  
+  
+查看ip ：
+::
+
+    ip addr
+
+设置ip信息 ：
+::
+
+    nmtui
+    
+安装ifconfig工具：
+::
+    
+ yum install net-tools    
+
+
+关闭防火墙:
+::
+
+    systemctl stop firewalld.service #停止firewall
+    systemctl disable firewalld.service #禁止firewall开机启动
+
+设置防火墙（开启端口）：
+::
+
+    firewall-cmd --zone=public --add-port=80/tcp --permanent
+    firewall-cmd --reload
+
+关闭selinux ：
+::
+
+    vi /etc/sysconfig/selinux
+    SELINUX=disabled
+
+    接着再执行如下命令,注意 setenforce 后面有空格:
+    setenforce 0
+    #设置 SELinux 状态
+    getenforce
+    #获取 SELinux 状态
+    --------------------
+    [root@localhost etc]# setenforce 0
+    [root@localhost etc]# getenforce
+    Permissive
+    -------------------
+
+安装tmux ：
+::
+    
+    yum install tmux -y    
+
+tmux 防止session名字过长 ：
+::
+
+    vi ~/.tmux.conf
+    set-option -g allow-rename off
+
+    重启tmux
+
