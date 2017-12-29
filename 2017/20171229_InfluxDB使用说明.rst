@@ -1,0 +1,434 @@
+InfluxDB使用说明
+===================================================
+
+
+操作系统 ： CentOS7.3.1611_x64
+
+go语言版本：1.8.3 linux/amd64
+
+InfluxDB版本：1.1.0
+
+
+安装InfluxDB之后，在/usr/bin下会有如下几个文件： 
+::
+
+    influxd          influxdb服务器
+    influx           influxdb命令行客户端
+    influx_inspect   查看工具
+    influx_stress    压力测试工具
+    influx_tsm       数据库转换工具（将数据库从b1或bz1格式转换为tsm1格式）
+
+下面简单介绍下各个工具的使用。
+
+influxd使用方法介绍
+-----------------------------------------------------
+该可执行文件为InfluxDB服务器程序，参数说明如下：
+
+::
+
+    [root@localhost ~]# influxd --help
+    Configure and start an InfluxDB server.
+
+    Usage: influxd [[command] [arguments]]
+
+    The commands are:
+
+        backup               downloads a snapshot of a data node and saves it to disk
+        config               display the default configuration
+        help                 display this help message
+        restore              uses a snapshot of a data node to rebuild a cluster
+        run                  run node with existing configuration
+        version              displays the InfluxDB version
+
+    "run" is the default command.
+
+    Use "influxd [command] -help" for more information about a command.
+
+* backup参数 
+
+数据备份功能，参数如下：
+
+::
+
+    [root@localhost ~]# influxd backup --help
+    Downloads a snapshot of a data node and saves it to disk.
+
+    Usage: influxd backup [flags] PATH
+
+        -host <host:port>
+                The host to connect to snapshot. Defaults to 127.0.0.1:8088.
+        -database <name>
+                The database to backup.
+        -retention <name>
+                Optional. The retention policy to backup.
+        -shard <id>
+                Optional. The shard id to backup. If specified, retention is required.
+        -since <2015-12-24T08:12:23Z>
+                Optional. Do an incremental backup since the passed in RFC3339
+                formatted time.
+
+    backup: flag: help requested
+        
+* config参数 
+
+显示InfluxDB默认参数，使用示例 ：
+::
+
+    influxd backup -host 127.0.0.1:8088 -database mydb -since 2015-12-24T08:12:23Z back1
+
+其中，mydb为数据库名称，back1为备份文件夹。    
+
+* help参数 
+
+显示帮助信息，使用示例 ：influxd help 
+
+* restore参数
+
+数据恢复功能，使用该功能时，InfluxDB应当关闭。参数如下：
+
+::
+
+    [root@localhost ~]# influxd restore --help
+    Uses backups from the PATH to restore the metastore, databases,
+    retention policies, or specific shards. The InfluxDB process must not be
+    running during a restore.
+
+    Usage: influxd restore [flags] PATH
+
+        -metadir <path>
+                Optional. If set the metastore will be recovered to the given path.
+        -datadir <path>
+                Optional. If set the restore process will recover the specified
+                database, retention policy or shard to the given directory.
+        -database <name>
+                Optional. Required if no metadir given. Will restore the database
+                TSM files.
+        -retention <name>
+                Optional. If given, database is required. Will restore the retention policy's
+                TSM files.
+        -shard <id>
+                Optional. If given, database and retention are required. Will restore the shard's
+                TSM files.
+
+    restore: flag: help requested
+
+使用示例：
+::
+  
+    influxd restore -database mydb -metadir /var/lib/influxdb/meta  -datadir /var/lib/influxdb/data/ back1
+
+其中，mydb为数据库名称，back1为之前备份数据的文件夹，/var/lib/influxdb/meta为InfluxDB的meta文件夹，/var/lib/influxdb/data/为InfluxDB的data文件夹。  
+
+* run参数
+
+run为默认参数，在控制台直接输入 influxd 命令，实际上执行的是： influxd run
+
+默认配置为INFLUXDB_CONFIG_PATH环境变量设置的的路径，或者~/.influxdb/influxdb.conf，或者 /etc/influxdb/influxdb.conf 
+
+参数说明如下：
+
+::
+
+    [root@localhost tsdbBin]# influxd run --help
+    Runs the InfluxDB server.
+
+    Usage: influxd run [flags]
+
+        -config <path>
+                Set the path to the configuration file.
+                This defaults to the environment variable INFLUXDB_CONFIG_PATH,
+                ~/.influxdb/influxdb.conf, or /etc/influxdb/influxdb.conf if a file
+                is present at any of these locations.
+                Disable the automatic loading of a configuration file using
+                the null device (such as /dev/null).
+        -pidfile <path>
+                Write process ID to a file.
+        -cpuprofile <path>
+                Write CPU profiling information to a file.
+        -memprofile <path>
+                Write memory usage information to a file.
+
+    run: flag: help requested
+
+使用示例 ：
+
+influxd run -config default.conf ： 使用default.conf中的配置启动InfluxDB
+
+influxd run -pidfile /tmp/test1.pid : 启动InfluxDB并在/tmp/test1.pid文件中写入pid
+
+cpuprofile和memprofile用于InfluxDB性能分析时使用
+
+* version参数
+
+显示版本信息，使用示例：influxd version 
+    
+
+influx使用方法介绍
+-----------------------------------------------------
+
+该可执行文件为InfluxDB命令行客户端，参数如下：
+
+::
+
+    [root@localhost ~]# influx --help
+    Usage of influx:
+      -version
+           Display the version and exit.
+      -host 'host name'
+           Host to connect to.
+      -port 'port #'
+           Port to connect to.
+      -database 'database name'
+           Database to connect to the server.
+      -password 'password'
+          Password to connect to the server.  Leaving blank will prompt for password (--password '').
+      -username 'username'
+           Username to connect to the server.
+      -ssl
+            Use https for requests.
+      -unsafeSsl
+            Set this when connecting to the cluster using https and not use SSL verification.
+      -execute 'command'
+           Execute command and quit.
+      -format 'json|csv|column'
+           Format specifies the format of the server responses:  json, csv, or column.
+      -precision 'rfc3339|h|m|s|ms|u|ns'
+           Precision specifies the format of the timestamp:  rfc3339, h, m, s, ms, u or ns.
+      -consistency 'any|one|quorum|all'
+           Set write consistency level: any, one, quorum, or all
+      -pretty
+           Turns on pretty print for the json format.
+      -import
+           Import a previous database export from file
+      -pps
+           How many points per second the import will allow.  By default it is zero and will not throttle importing.
+      -path
+           Path to file to import
+      -compressed
+           Set to true if the import file is compressed
+
+    Examples:
+
+        # Use influx in a non-interactive mode to query the database "metrics" and pretty print json:
+        $ influx -database 'metrics' -execute 'select * from cpu' -format 'json' -pretty
+
+        # Connect to a specific database on startup and set database context:
+        $ influx -database 'metrics' -host 'localhost' -port '8086'
+
+    [root@localhost ~]#
+
+使用示例：
+
+influx ：直接连接本机的8086端口
+
+influx -version ：显示版本信息并退出
+
+influx -database 'mydb' -execute 'select * from cpu_load' ： 执行单条指令并退出 
+
+influx_inspect使用方法介绍
+-----------------------------------------------------
+该可执行文件为InfluxDB查看工具，参数如下：
+
+::
+
+    [root@localhost ~]# influx_inspect help
+    Usage: influx_inspect [[command] [arguments]]
+
+    The commands are:
+
+        dumptsm              dumps low-level details about tsm1 files.
+        export               exports raw data from a shard to line protocol
+        help                 display this help message
+        report               displays a shard level report
+
+    "help" is the default command.
+
+    Use "influx_inspect [command] -help" for more information about a command.
+    [root@localhost ~]#
+
+* dumptsm参数
+
+解析tsm文件，参数如下：
+ 
+::
+
+    [root@localhost ~]# influx_inspect dumptsm --help
+    Dumps low-level details about tsm1 files.
+
+    Usage: influx_inspect dumptsm [flags] <path
+
+        -index
+                Dump raw index data
+        -blocks
+                Dump raw block data
+        -all
+                Dump all data. Caution: This may print a lot of information
+        -filter-key <name>
+                Only display index and block data match this key substring
+    [root@localhost ~]#
+
+使用示例：
+    
+::
+
+    [root@localhost ~]# influx_inspect dumptsm -all /var/lib/influxdb/data/mydb/autogen/12/000000004-000000003.tsm
+    Summary:
+      File: /var/lib/influxdb/data/mydb/autogen/12/000000004-000000003.tsm
+      Time Range: 2017-05-23T09:10:10.202006046Z - 2017-05-23T11:10:27.319302712Z
+      Duration: 2h0m17.117296666s   Series: 1   File Size: 325
+
+    Index:
+
+      Pos   Min Time                        Max Time                        Ofs     Size    Key                              Field
+      1     2017-05-23T09:10:10.202006046Z  2017-05-23T09:14:50.532248441Z  5       41      cpu_load,host=server_1,region=us-west     value
+      2     2017-05-23T09:26:34.541091603Z  2017-05-23T09:26:34.541091603Z  46      34      cpu_load,host=server_1,region=us-west     value
+      3     2017-05-23T10:59:10.72052295Z   2017-05-23T10:59:10.72052295Z   80      34      cpu_load,host=server_1,region=us-west     value
+      4     2017-05-23T11:10:02.987617654Z  2017-05-23T11:10:27.319302712Z  114     40      cpu_load,host=server_1,region=us-west     value
+    Blocks:
+      Blk   Chk             Ofs     Len     Type    Min Time                        Points  Enc [T/V]       Len [T/V]
+      0     1091651936      5       37      float64 2017-05-23T09:10:10.202006046Z  2       rle/gor         16/19
+      1     1782732741      46      30      float64 2017-05-23T09:26:34.541091603Z  1       s8b/gor         9/19
+      2     2962666225      121     30      float64 2017-05-23T10:59:10.72052295Z   1       s8b/gor         9/19
+      3     1165672455      230     36      float64 2017-05-23T11:10:02.987617654Z  2       rle/gor         15/19
+
+    Statistics
+      Blocks:
+        Total: 4 Size: 149 Min: 30 Max: 37 Avg: 37
+      Index:
+        Total: 4 Size: 163
+      Points:
+        Total: 6
+      Encoding:
+        Timestamp:  none: 0 (0%)    s8b: 2 (50%)    rle: 2 (50%)
+        Float:      none: 0 (0%)    gor: 4 (100%)
+      Compression:
+        Per block: 24.83 bytes/point
+        Total: 54.17 bytes/point
+    [root@localhost ~]#
+    
+    
+* export参数
+
+使用示例：
+
+::
+
+    [root@localhost ~]# influx_inspect export -database mydb -datadir /var/lib/influxdb/data/ -waldir /var/lib/influxdb/wal/ -out /tmp/export
+    writing out tsm file data for mydb/autogen...complete.
+    writing out wal file data for mydb/autogen...complete.
+    [root@localhost ~]# cat /tmp/export
+    # INFLUXDB EXPORT: 1677-09-21T08:12:43+08:00 - 2262-04-12T07:47:16+08:00
+    # DDL
+    CREATE DATABASE mydb WITH NAME autogen
+    # DML
+    # CONTEXT-DATABASE:mydb
+    # CONTEXT-RETENTION-POLICY:autogen
+    # writing tsm data
+    cpu_load,host=server_1,region=us-west value=0.2 1495530610202006046
+    cpu_load,host=server_1,region=us-west value=0.2 1495530890532248441
+    cpu_load,host=server_1,region=us-west value=0.2 1495531594541091603
+    cpu_load,host=server_1,region=us-west value=0.2 1495537150720522950
+    cpu_load,host=server_1,region=us-west value=0.2 1495537802987617654
+    cpu_load,host=server_1,region=us-west value=0.2 1495537827319302712
+    # writing wal data
+    [root@localhost ~]#
+  
+* help
+
+显示帮助信息。
+
+* report 
+
+显示shard信息，示例如下：
+
+::
+
+    [root@localhost ~]# influx_inspect report /var/lib/influxdb/data/mydb/autogen/12/
+    File                    Series  Load Time
+    000000004-000000003.tsm 1       51.104µs
+
+    Statistics
+      Series:
+        Total (est): 1
+    Completed in 269.807µs
+    [root@localhost ~]#
+
+
+influx_stress使用方法介绍
+-----------------------------------------------------
+该可执行文件为InfluxDB压力测试工具，参数如下：
+::
+
+    [root@localhost ~]# influx_stress --help
+    Usage of influx_stress:
+      -addr string
+            IP address and port of database where response times will persist (e.g., localhost:8086) (default "http://localhost:8086")
+      -config string
+            The stress test file
+      -cpuprofile filename
+            Write the cpu profile to filename
+      -database string
+            name of database where the response times will persist (default "stress")
+      -db string
+            target database within test system for write and query load
+      -retention-policy string
+            name of the retention policy where the response times will persist
+      -tags value
+            A comma seperated list of tags
+      -v2
+            Use version 2 of stress tool
+    [root@localhost ~]#
+
+直接执行influx_stress命令即可启动压力测试，会在本地InfluxDB自动创建名叫stress的数据库，并向里面写数据。
+
+influx_tsm使用方法介绍
+-----------------------------------------------------
+该可执行文件为InfluxDB数据库转换工具（将数据库从b1或bz1格式转换为tsm1格式，其中b1 和 bz1 为InfluxDB 0.9版中使用过的存储引擎格式），属于InfluxDB版本兼容系列的内容。
+
+使用该工具时，InfluxDB应该处于关闭状态。
+
+参数如下：
+
+::
+
+    [root@localhost ~]# influx_tsm --help
+    Usage: influx_tsm [options] <data-path>
+
+    Convert a database from b1 or bz1 format to tsm1 format.
+
+    This tool will backup the directories before conversion (if not disabled).
+    The backed-up files must be removed manually, generally after starting up the
+    node again to make sure all of data has been converted correctly.
+
+    To restore a backup:
+      Shut down the node, remove the converted directory, and
+      copy the backed-up directory to the original location.
+
+    Options:
+      -backup string
+            The location to backup up the current databases. Must not be within the data directory.
+      -dbs string
+            Comma-delimited list of databases to convert. Default is to convert all databases.
+      -debug string
+            If set, http debugging endpoints will be enabled on the given address
+      -interval duration
+            How often status updates are printed. (default 5s)
+      -nobackup
+            Disable database backups. Not recommended.
+      -parallel
+            Perform parallel conversion. (up to GOMAXPROCS shards at once)
+      -profile string
+            CPU Profile location
+      -sz uint
+            Maximum size of individual TSM files. (default 2147483648)
+      -y    Don't ask, just convert
+
+    [root@localhost ~]#
+
+
+
+
+
+
+
+
