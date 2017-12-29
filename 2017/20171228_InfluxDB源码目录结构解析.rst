@@ -1,0 +1,279 @@
+InfluxDB源码目录结构解析
+---------------------------------------
+
+操作系统 ： CentOS7.3.1611_x64
+
+go语言版本：1.8.3 linux/amd64
+
+InfluxDB版本：1.1.0
+
+influxdata主目录结构
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+    [root@localhost influxdata]# pwd
+    /root/dev/golib/src/github.com/influxdata
+    [root@localhost influxdata]# tree -d -L 1
+    .
+    ├── influxdb
+    ├── influxql
+    ├── usage-client
+    ├── yamux
+    └── yarpc
+
+
+目录解析说明：
+
+* influxdb 
+
+    为源码的主目录
+
+* influxql 
+
+    实现了InfluxDB查询语言的解析器（源码主目录里面引用的是influxdata/influxdb/influxql，没有该目录的相关引用）
+
+* usage-client 
+
+    client lib V1版本
+
+* yamux 
+
+    Yet another Multiplexer（又一个多路复用器）是Golang的多路复用库
+
+* yarpc 
+
+    Yet Another RPC （又一个RPC）是Golang的RPC库
+
+
+源码主目录结构
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+一级目录结构如下：
+
+::
+
+    [root@localhost influxdb]# pwd
+    /root/dev/golib/src/github.com/influxdata/influxdb
+    [root@localhost influxdb]# tree -d -L 1
+    .
+    ├── client
+    ├── cmd
+    ├── coordinator
+    ├── etc
+    ├── importer
+    ├── influxql
+    ├── internal
+    ├── man
+    ├── models
+    ├── monitor
+    ├── pkg
+    ├── scripts
+    ├── services
+    ├── stress
+    ├── tcp
+    ├── tests
+    ├── toml
+    ├── tsdb
+    └── uuid
+
+二级目录结构如下：
+
+::
+
+    [root@localhost influxdb]# tree -d -L 2
+    .
+    ├── client
+    │   └── v2
+    ├── cmd
+    │   ├── influx
+    │   ├── influxd
+    │   ├── influx_inspect
+    │   ├── influx_stress
+    │   └── influx_tsm
+    ├── coordinator
+    ├── etc
+    │   └── burn-in
+    ├── importer
+    │   └── v8
+    ├── influxql
+    │   ├── internal
+    │   └── neldermead
+    ├── internal
+    ├── man
+    ├── models
+    ├── monitor
+    │   └── diagnostics
+    ├── pkg
+    │   ├── deep
+    │   ├── escape
+    │   ├── limiter
+    │   ├── pool
+    │   └── slices
+    ├── scripts
+    ├── services
+    │   ├── admin
+    │   ├── collectd
+    │   ├── continuous_querier
+    │   ├── graphite
+    │   ├── httpd
+    │   ├── meta
+    │   ├── opentsdb
+    │   ├── precreator
+    │   ├── retention
+    │   ├── snapshotter
+    │   ├── subscriber
+    │   └── udp
+    ├── stress
+    │   ├── stress_test_server
+    │   └── v2
+    ├── tcp
+    ├── tests
+    │   ├── siege
+    │   ├── tmux
+    │   └── urlgen
+    ├── toml
+    ├── tsdb
+    │   ├── engine
+    │   └── internal
+    └── uuid
+
+
+目录解析说明：
+
+* client
+ 
+    client lib V2版本
+
+* cmd 
+
+    InfluxDB相关程序所在目录。其中：
+      
+    influxd目录为InfluxDB主程序代码；
+
+    influx为InfluxDB自带的控制台管理工具源码；
+
+    influx_inspect为InfluxDB数据查看工具源码；
+
+    influx_stress为InfluxDB压力测试工具源码；
+
+    influx_tsm为数据库转换工具（将数据库从b1或bz1格式转换为tsm1格式）源码
+        
+* coordinator 
+
+    协调器，负责数据的写入和一些创建语句的执行。
+
+    在InfluxDB的ChangeLog中显示在v1.0.0中使用coordinator替换cluster，感觉自建集群功能可以通过此模块实现。 
+
+* etc 
+
+    存放默认配置
+
+* importer 
+
+    版本向后兼容相关代码，在ReadMe中已经提到：Version `0.8.9` of InfluxDB adds support to export your data to a format that can be imported into `0.9.3` and later.
+
+
+* influxql
+
+    实现了InfluxDB查询语言的解析器
+
+* internal 
+
+    主要实现了MetaClient接口
+
+* man 
+
+    帮助手册 
+
+* models 
+
+    基础数据类型定义
+
+* monitor
+
+    InfluxDB系统监控 
+
+* pkg
+
+    一些通用包的集合。
+
+    deep里面主要实现了deepValueEqual方法，用于深层次比较两个值是否相等；
+
+    escape里面主要实现了byte和string两种数据类型转义字符的相关操作；
+
+    limiter里面主要是一个基于channel实现的简单并发限制器Fixed；
+
+    pool里面主要实现了Bytes和Generic两种类型的Pool，在Pool中的对象不使用时不会被垃圾回收自动清理掉；
+
+    slices 里面主要实现了一些string数组的操作；    
+
+
+* scripts
+
+    该目录存放的是一些关于InfluxDB的脚本。
+
+* services
+
+    该目录存放的是一些关于InfluxDB的服务。
+
+    admin 为InfluxDB内置的管理服务；
+
+    collectd 为collectd（https://collectd.org）对接服务，可以接收通过UDP发送过来的collectd格式数据；
+
+    continuous_querier 为InfluxDB的CQ服务；
+
+    graphite 为InfluxDB的graphite服务；
+
+    httpd 为InfluxDB的http服务，可以通过该接口进行数据库数据的写入和查询等操作；
+
+    meta 为InfluxDB的元数据服务，用于管理数据库的元数据相关内容；
+
+    opentsdb 为InfluxDB的opentsdb服务，可用于替换opentsdb；
+
+    precreator 为InfluxDB的Shard预创建服务；
+
+    retention 为InfluxDB的数据保留策略的强制执行服务，主要用于定时删除文件；
+
+    snapshotter 为InfluxDB的快照服务；
+
+    subscriber 为InfluxDB的订阅服务；
+
+    udp 为InfluxDB的udp服务，可以通过该接口进行数据库的写入和查询等操作；
+
+
+* stress
+
+    该目录存放的是压力测试相关内容。
+
+* tcp
+
+    网络连接的多路复用。
+
+* tests
+
+    测试相关内容
+
+* toml
+
+    toml的解析器，和另一个toml解析器（github.com/BurntSushi/toml）不同，为独立的解析模块，主要是解析时间字符串和磁盘容量数据。
+
+* tsdb
+
+    tsdb目录主要是时序数据库的实现。
+
+* uuid
+
+    该目录里面主要存放uuid生成的相关代码。
+
+
+
+
+    
+    
+
+
+
+
+
+
+
