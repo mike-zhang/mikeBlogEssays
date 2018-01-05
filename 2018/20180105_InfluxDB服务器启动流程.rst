@@ -1,0 +1,240 @@
+InfluxDB服务器启动流程
+===================================================
+
+
+操作系统 ： CentOS7.3.1611_x64
+
+go语言版本：1.8.3 linux/amd64
+
+InfluxDB版本：1.1.0
+
+
+源码路径： github.com/influxdata/influxdb/cmd/influxd
+
+程序入口（main.go）：
+::
+
+    func main() {
+        rand.Seed(time.Now().UnixNano())
+
+        m := NewMain()
+        if err := m.Run(os.Args[1:]...); err != nil {
+            fmt.Fprintln(os.Stderr, err)
+            os.Exit(1)
+        }
+    }
+    
+在main函数中，调用Main.Run函数。
+
+命令行参数为空或"run"
+------------------------------------------------------
+
+如命令行参数为空或"run"，则执行如下流程：
+
+::
+
+    case "", "run":
+        cmd := run.NewCommand()
+
+        // Tell the server the build details.
+        cmd.Version = version
+        cmd.Commit = commit
+        cmd.Branch = branch
+
+        if err := cmd.Run(args...); err != nil {
+            return fmt.Errorf("run: %s", err)
+        }
+
+        signalCh := make(chan os.Signal, 1)
+        signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
+        m.Logger.Println("Listening for signals")
+
+        // Block until one of the signals above is received
+        select {
+        case <-signalCh:
+            m.Logger.Println("Signal received, initializing clean shutdown...")
+            go func() {
+                cmd.Close()
+            }()
+        }
+
+        // Block again until another signal is received, a shutdown timeout elapses,
+        // or the Command is gracefully closed
+        m.Logger.Println("Waiting for clean shutdown...")
+        select {
+        case <-signalCh:
+            m.Logger.Println("second signal received, initializing hard shutdown")
+        case <-time.After(time.Second * 30):
+            m.Logger.Println("time limit reached, initializing hard shutdown")
+        case <-cmd.Closed:
+            m.Logger.Println("server shutdown completed")
+        }
+
+        // goodbye.
+
+执行 Command.Run 函数，后面跟的代码是处理系统信号的相关内容。
+
+Command.Run函数内容如下：
+
+::
+
+    func (cmd *Command) Run(args ...string) error {
+        // Parse the command line flags.
+        options, err := cmd.ParseFlags(args...)
+        if err != nil {
+            return err
+        }
+
+        // Print sweet InfluxDB logo.
+        fmt.Print(logo)
+
+        // Configure default logging.
+        log.SetPrefix("[run] ")
+        log.SetFlags(log.LstdFlags)
+
+        // Set parallelism.
+        runtime.GOMAXPROCS(runtime.NumCPU())
+
+        // Mark start-up in log.
+        log.Printf("InfluxDB starting, version %s, branch %s, commit %s",
+            cmd.Version, cmd.Branch, cmd.Commit)
+        log.Printf("Go version %s, GOMAXPROCS set to %d", runtime.Version(), runtime.GOMAXPROCS(0))
+
+        // Write the PID file.
+        if err := cmd.writePIDFile(options.PIDFile); err != nil {
+            return fmt.Errorf("write pid file: %s", err)
+        }
+
+        // Parse config
+        config, err := cmd.ParseConfig(options.GetConfigPath())
+        if err != nil {
+            return fmt.Errorf("parse config: %s", err)
+        }
+
+        // Apply any environment variables on top of the parsed config
+        if err := config.ApplyEnvOverrides(); err != nil {
+            return fmt.Errorf("apply env config: %v", err)
+        }
+
+        // Validate the configuration.
+        if err := config.Validate(); err != nil {
+            return fmt.Errorf("%s. To generate a valid configuration file run `influxd config > influxdb.generated.conf`", err)
+        }
+
+        if config.HTTPD.PprofEnabled {
+            // Turn on block profiling to debug stuck databases
+            runtime.SetBlockProfileRate(int(1 * time.Second))
+        }
+
+        // Create server from config and start it.
+        buildInfo := &BuildInfo{
+            Version: cmd.Version,
+            Commit:  cmd.Commit,
+            Branch:  cmd.Branch,
+            Time:    cmd.BuildTime,
+        }
+        s, err := NewServer(config, buildInfo)        
+        if err != nil {
+            return fmt.Errorf("create server: %s", err)
+        }
+        s.CPUProfile = options.CPUProfile
+        s.MemProfile = options.MemProfile
+        if err := s.Open(); err != nil {
+            return fmt.Errorf("open server: %s", err)
+        }
+        cmd.Server = s
+
+        // Begin monitoring the server's error channel.
+        go cmd.monitorServerErrors()
+
+        return nil
+    }
+    
+解释如下：
+
+1、解析命令行参数并放入options变量中
+
+2、打印InfluxDB字符串logo
+
+3、设置日志前缀
+
+4、设置程序最大使用cpu的数量
+
+默认使用服务器上的所有cpu，最坏情况下会导致cpu占用100%的场景出现。
+
+5、添加启动日志
+
+6、记录pid文件
+
+该功能需要在命令行参数中指定pid文件路径才可以。
+
+7、加载配置文件
+
+解析并校验配置文件，如果没有问题则配置文件生效。
+
+8、设置profile信息并启动服务器
+
+9、启动各项服务
+
+执行Server.Open函数（run/server.go）启动各项服务，具体内容可以在Server.Open函数中查看。
+
+10、执行monitorServerErrors用于监控服务器出错情况      
+   
+
+命令行参数为"backup"
+------------------------------------------------------
+如果命令行参数为"backup"，则执行如下流程：
+
+::
+
+    case "backup":
+        name := backup.NewCommand()
+        if err := name.Run(args...); err != nil {
+            return fmt.Errorf("backup: %s", err)
+        }
+
+数据备份流程。        
+
+命令行参数为"restore"
+------------------------------------------------------
+
+如果命令行参数为"restore"，则执行如下流程：
+
+::        
+
+    case "restore":
+        name := restore.NewCommand()
+        if err := name.Run(args...); err != nil {
+            return fmt.Errorf("restore: %s", err)
+        }
+
+数据恢复流程。
+        
+命令行参数为"config"
+------------------------------------------------------
+
+如果命令行参数为"config"，则执行如下流程：
+
+::
+
+    case "config":
+        if err := run.NewPrintConfigCommand().Run(args...); err != nil {
+            return fmt.Errorf("config: %s", err)
+        }
+        
+输出默认的配置信息。
+
+命令行参数为"help"
+------------------------------------------------------
+
+如果命令行参数为"help"，则执行如下流程：
+
+::    
+
+    case "help":
+        if err := help.NewCommand().Run(args...); err != nil {
+            return fmt.Errorf("help: %s", err)
+        }
+
+输出帮助信息。
+
