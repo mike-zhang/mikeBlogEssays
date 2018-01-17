@@ -1,0 +1,419 @@
+IEEE754标准的浮点数存储格式
+===================================================
+
+基本存储格式（从高到低） ： Sign +	Exponent  +	Fraction
+
+
+Sign ： 符号位  
+
+Exponent ： 阶码
+
+Fraction ： 有效数字
+
+32位浮点数存储格式解析
+------------------------------------------------------
+
+Sign ： 1 bit（第31个bit）
+
+Exponent ：8 bits （第 30 至 23 共 8 个bits）
+
+Fraction ：23 bits （第 22 至 0 共 23 个bits）
+
+32位非0浮点数的真值为(python语法) ：
+::
+
+    (-1) **Sign * 2 **(Exponent-127) * (1 + Fraction)
+
+示例如下：
+
+a = 12.5
+
+1、求解符号位
+
+a大于0，则 Sign 为 0 ，用二进制表示为： 0
+
+2、求解阶码
+
+a表示为二进制为： 1100.0
+
+小数点需要向左移动3位，则 Exponent 为 130 （127 + 3），用二进制表示为： 10000010
+
+3、求解有效数字
+
+有效数字需要去掉最高位隐含的1，则有效数字的整数部分为 ： 100
+
+将十进制的小数转换为二进制的小数的方法为将小数*2，取整数部分，则小数部分为： 1
+
+后面补0，则a的二进制可表示为： 01000001010010000000000000000000 
+
+即 ：
+0100 0001 0100 1000 0000 0000 0000 0000
+
+用16进制表示 ： 0x41480000
+
+
+4、还原真值  
+::
+
+    Sign = bin(0) = 0
+
+    Exponent = bin(10000010) = 130
+
+    Fraction = bin(0.1001) = 2 ** (-1) + 2 ** (-4) = 0.5625
+
+真值： 
+::
+
+    (-1) **0 * 2 **(130-127) * (1 + 0.5625) = 12.5
+
+
+32位浮点数二进制存储解析代码（c++）：
+::
+
+    #include <stdio.h>
+    #include <math.h> 
+
+    // IEEE754标准的32位浮点数存储格式
+
+    const int FloatExp = (1<<7)-1;
+
+    typedef struct UFP {
+        unsigned int Fraction:23;
+        unsigned int Exp:8;
+        unsigned int S:1;
+    }UFP;
+
+
+    void showFloat(float a)
+    {
+        // 内存表示形式
+        char *p2=(char*)&a;
+        printf("showFloat : 0x ");
+        for(int i = sizeof(a)-1 ; i >= 0 ; i-- )
+        {
+            printf("%02x ",*(p2+i) & 0x000000ff);
+        }
+        printf("\n");
+    }
+
+    void showIEEE754(float a)
+    {
+        // IEEE754 表示形式
+        unsigned int b=0;
+        unsigned int c=0,logLen=0;
+        printf("showIEEE754 a = %f\n",a);
+
+        if(a < 0) c = 1;
+        b |= (c<<31);
+
+        logLen = int(log2(int(a)));
+        c = (logLen + FloatExp)<<23;
+        //printf("showIEEE754 c = %d\n",c);
+        b |= c;
+        //printf("showIEEE754 b = 0x%08x\n",b);
+        
+        // 填入整数部分的二进制数据
+        unsigned int varTmp=int(fabs(a));
+        while((varTmp | 0xff7fffff) != 0xffffffff) 
+        {
+            varTmp = varTmp << 1;
+        //    printf("showIEEE754 varTmp = 0x%08x\n",varTmp);
+        }
+        printf("showIEEE754 varTmp = 0x%08x\n",varTmp);
+        c = varTmp & 0x007fffff; // 去掉尾数最高位1
+        printf("showIEEE754 c = 0x%08x\n",c);
+        double a1 = a - int(a);
+        // 填入小数部分的二进制数据
+        for(int i=23-logLen-1;i>0;i--)
+        {
+            a1 *= 2;
+            printf("showIEEE754 i = %d , a1 = %f , ",i,a1);
+            // 将十进制的小数转换为二进制的小数的方法为将小数*2，取整数部分
+            if( a1 > 0.999999 )
+            {
+                c |= (1 << i);
+                a1 = a1 - long(a1);
+                printf("showIEEE754 c = %08x , ",c);
+            }
+            printf("showIEEE754 b = 0x%08x\n",b);
+        }
+    //    printf("showIEEE754 b = 0x%08x\n",b);
+    //    printf("showIEEE754 c = 0x%08x\n",c);
+        b |= c;
+        printf("showIEEE754 : 0x%08x\n",b);
+        
+    }
+
+    int main()
+    {
+        float a = 12.5;
+        UFP *p = (UFP*)&a;
+        unsigned int b=0;
+        unsigned int aTmp1=0,aTmp2=0;
+        printf("sizeof(float) : %d\n",sizeof(float));
+        printf("sizeof(int) : %d\n",sizeof(int));
+        printf("a = %f\n",a);
+        showFloat(a);
+        printf("UFP : %0X,%0X,%0X\n",p->S,p->Exp,p->Fraction);
+        b = ((aTmp1=p->S)<<31) | ((aTmp2=p->Exp)<<23) | p->Fraction;
+        printf("b : 0x%08x\n",b);
+        showIEEE754(a);
+    }
+
+运行效果：
+::
+
+    [root@localhost floatTest1]# ./floatToBin1
+    sizeof(float) : 4
+    sizeof(int) : 4
+    a = 12.500000
+    showFloat : 0x 41 48 00 00
+    UFP : 0,82,480000
+    b : 0x41480000
+    showIEEE754 a = 12.500000
+    showIEEE754 varTmp = 0x00c00000
+    showIEEE754 c = 0x00400000
+    showIEEE754 i = 19 , a1 = 1.000000 , showIEEE754 c = 00480000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 18 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 17 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 16 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 15 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 14 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 13 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 12 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 11 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 10 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 9 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 8 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 7 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 6 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 5 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 4 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 3 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 2 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 i = 1 , a1 = 0.000000 , showIEEE754 b = 0x41000000
+    showIEEE754 : 0x41480000
+    [root@localhost floatTest1]#
+   
+
+
+64位浮点数存储格式解析
+------------------------------------------------------
+
+Sign ： 1 bit（第31个bit）
+
+Exponent ：11 bits （第 62 至 52 共 11 个bits）
+
+Fraction ：52 bits （第 51 至 0 共 52 个bits）
+
+64位非0浮点数的真值为(python语法) ：
+::
+
+    (-1) **Sign * 2 **(Exponent-1023) * (1 + Fraction)
+
+
+示例如下：
+
+a = 12.5
+
+1、求解符号位
+
+a大于0，则 Sign 为 0 ，用二进制表示为： 0
+
+2、求解阶码
+
+a表示为二进制为： 1100.0
+
+小数点需要向左移动3位，则 Exponent 为 1026 （1023 + 3），用二进制表示为： 10000000010
+
+3、求解有效数字
+
+有效数字需要去掉最高位隐含的1，则有效数字的整数部分为 ： 100
+
+将十进制的小数转换为二进制的小数的方法为将小数*2，取整数部分，则小数部分为： 1
+
+后面补0，则a的二进制可表示为：
+
+0100000000101001000000000000000000000000000000000000000000000000
+
+
+即 ：
+0100 0000 0010 1001 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+
+用16进制表示 ： 0x4029000000000000
+
+
+4、还原真值  
+
+::
+
+    Sign = bin(0) = 0
+    Exponent = bin(10000000010) = 1026
+    Fraction = bin(0.1001) = 2 ** (-1) + 2 ** (-4) = 0.5625
+
+真值： 
+::
+    
+    (-1) **0 * 2 **(1026-1023) * (1 + 0.5625) = 12.5
+
+
+64位浮点数二进制存储解析代码（c++）：
+::
+
+    #include <stdio.h>
+    #include <math.h> 
+
+    // IEEE754标准的64位浮点数存储格式
+    const int DoubleExp = (1<<10)-1;
+
+    typedef struct UFDP {
+        unsigned long Fraction:52;
+        unsigned long Exp:11;
+        unsigned long S:1;
+    }UFDP;
+
+    void showDouble(double a)
+    {
+        char *p2=(char*)&a;
+        printf("showDouble : 0x ");
+        for(int i = sizeof(a)-1 ; i >= 0 ; i-- )
+        {
+            printf("%02x ",*(p2+i) & 0x00000000000000ff);
+        }
+        printf("\n");
+    }
+
+    void showIEEE754(double a)
+    {
+        // IEEE754
+        unsigned long b=0;
+        unsigned long c=0,logLen=0;
+        printf("showIEEE754 a = %lf\n",a);
+        if(a < 0) c = 1;
+        b |= (c<<63);
+
+        logLen = long(log2(long(a)));
+        printf("showIEEE754 logLen = %d\n",logLen);
+        c = (logLen + DoubleExp) << 52 ;
+        printf("showIEEE754 c = %ld(0x%0lx)\n",c,c);
+        b |= c;
+        printf("showIEEE754 b = 0x%0lx\n",b);
+        
+        unsigned long varTmp=long(fabs(a));
+        while((varTmp | 0xffefffffffffffff) != 0xffffffffffffffff)
+        {
+            varTmp = varTmp << 1;
+        //    printf("showIEEE754 varTmp = 0x%08x\n",varTmp);
+        }
+        varTmp = varTmp & 0x000fffffffffffff;
+        printf("showIEEE754 varTmp = 0x%0lx\n",varTmp);
+        c = varTmp;
+        printf("showIEEE754 c = 0x%0lx\n",c);
+        double a1 = a - long(a);
+        for(int i=52-logLen-1;i>0;i--)
+        {
+            a1 *= 2;
+            printf("showIEEE754 i = %d , a1 = %lf , ",i,a1);
+            // 将十进制的小数转换为二进制的小数的方法为将小数*2，取整数部分
+            if( a1 > 0.999999 )
+            {
+                c |= ((unsigned long)(1) << i);
+                a1 = a1 - long(a1);
+                printf("showIEEE754 c = %0lx , ",c);
+            }
+            printf("showIEEE754 b = 0x%0lx\n",b);
+        }
+        b |= c;
+        printf("showIEEE754 : 0x%0lx\n",b);
+        
+    }
+
+    int main()
+    {
+        double a = 12.5;
+        UFDP *p = (UFDP*)&a;
+        unsigned long b=0;
+        
+        printf("sizeof(double) : %d\n",sizeof(double));
+        printf("sizeof(long) : %d\n",sizeof(long));
+        
+        printf("a = %lf\n",a);
+        showDouble(a);
+        printf("UFP : %0X,%0X,%0X\n",p->S,p->Exp,p->Fraction);
+        b = ((unsigned long)(p->S)<<63) | ((unsigned long)(p->Exp)<<52) | p->Fraction;
+        printf("b : 0x%0x\n",b);
+        showIEEE754(a);
+    }
+
+运行效果：
+::
+
+    [root@localhost t1]# ./doubleToBin1
+    sizeof(double) : 8
+    sizeof(long) : 8
+    a = 12.500000
+    showDouble : 0x 40 29 00 00 00 00 00 00
+    UFP : 0,402,0
+    b : 0x0
+    showIEEE754 a = 12.500000
+    showIEEE754 logLen = 3
+    showIEEE754 c = 4620693217682128896(0x4020000000000000)
+    showIEEE754 b = 0x4020000000000000
+    showIEEE754 varTmp = 0x8000000000000
+    showIEEE754 c = 0x8000000000000
+    showIEEE754 i = 48 , a1 = 1.000000 , showIEEE754 c = 9000000000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 47 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 46 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 45 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 44 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 43 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 42 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 41 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 40 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 39 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 38 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 37 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 36 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 35 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 34 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 33 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 32 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 31 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 30 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 29 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 28 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 27 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 26 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 25 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 24 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 23 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 22 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 21 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 20 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 19 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 18 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 17 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 16 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 15 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 14 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 13 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 12 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 11 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 10 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 9 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 8 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 7 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 6 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 5 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 4 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 3 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 2 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 i = 1 , a1 = 0.000000 , showIEEE754 b = 0x4020000000000000
+    showIEEE754 : 0x4029000000000000
+    [root@localhost t1]#
+
+
+ 
+ 
+
+ 
