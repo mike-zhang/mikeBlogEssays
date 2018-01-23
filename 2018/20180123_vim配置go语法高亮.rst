@@ -1,0 +1,53 @@
+vim配置go语法高亮
+===================================================
+
+操作系统 ： CentOS7.3.1611_x64
+
+go 版本 : go1.8.3 linux/amd64
+
+vim版本 ：version 7.4.160
+
+
+安装git
+::
+
+    yum install git
+
+安装vim-go :
+
+    cd ~
+    mkdir .vim
+    cd .vim
+    mkdir autoload  plugged
+    cd plugged
+    git clone https://github.com/fatih/vim-go vim-go    
+    cd autoload
+    wget https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+
+配置vimrc文件
+::
+
+    [root@localhost ~]# cat ~/.vimrc
+    call plug#begin()
+    Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+    call plug#end()
+    let g:go_version_warning = 0
+
+    [root@localhost ~]#
+
+    
+如果觉得上面的操作比较麻烦，可以使用我这里的压缩文件:
+
+https://github.com/mike-zhang/mikeBlogEssays/tree/master/2018/other/20180123_vim_go
+
+具体如下：
+::
+
+    cd ~
+    tar zxvf vim.tar.gz
+    tar zxvf vimrc.tar.gz
+
+
+
+ 
