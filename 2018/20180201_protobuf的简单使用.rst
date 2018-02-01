@@ -1,0 +1,306 @@
+protobuf的简单使用
+===================================================
+
+操作系统 ： CentOS7.3.1611_x64
+
+gcc版本 ：4.8.5
+
+go 版本 : go1.8.3 linux/amd64
+
+Python 版本 : 2.7.5
+
+libprotoc ： 2.5.0
+
+
+Protobuf是Google开发一种数据描述语言,能够将结构化数据序列化,可用于数据存储、通信协议等方面。
+
+首页： https://developers.google.com/protocol-buffers/
+
+文档： https://developers.google.com/protocol-buffers/docs/overview
+
+github地址： https://github.com/google/protobuf 
+
+这里记录了C++、Go和Python语言的简单使用示例，更多内容请参考官网手册。
+
+
+准备工作
+--------------------------------------
+
+安装protobuf：
+::
+
+    yum install protobuf protobuf-compiler protobuf-c-devel protobuf-devel
+
+写proto文件（addr.book.proto）：
+::
+
+    package addr;
+    message book
+    {
+       required int32     id = 1;
+       required string    str = 2;
+       optional int32     opt = 3;
+    }
+
+
+C++示例
+-----------------------------------------    
+    
+写文件操作（writer.cpp）：
+::
+    
+    #include <iostream>
+    #include <fstream>
+    #include "addr.book.pb.h"
+
+    using namespace std;
+
+    int main(void)
+    {
+        addr::book msg1;
+        msg1.set_id(101);
+        msg1.set_str("book1");
+
+        fstream output("log", ios::out | ios::trunc | ios::binary);
+
+        if (!msg1.SerializeToOstream(&output)) {
+            cerr << "Failed to write msg." << endl;
+            return -1;
+        }
+        return 0;
+    }
+
+读文件操作（reader.cpp）：
+::
+
+    #include <iostream>
+    #include <fstream>
+    #include "addr.book.pb.h"
+
+    using namespace std;
+
+    void ListMsg(const addr::book &msg) {
+        cout << msg.id() << endl;
+        cout << msg.str() << endl;
+    }
+
+    int main(int argc, char* argv[]) {
+        addr::book msg1;
+        fstream input("log", ios::in | ios::binary);
+        if(!msg1.ParseFromIstream(&input)) {
+            cerr << "Failed to parse address book." << endl;
+            return -1;
+        }
+        ListMsg(msg1);
+    }
+    
+Makefile文件：
+::
+
+    CC = g++
+    CFLAGS = -g -O2 -Wall
+    SRC_DIR=.
+    DST_DIR=libs
+
+    all:
+        make genproto
+        make writer
+        make reader
+
+    genproto:
+        mkdir -p $(DST_DIR)
+        protoc -I=$(SRC_DIR) --cpp_out=$(DST_DIR) addr.book.proto
+
+    writer:
+        $(CC) -o writer writer.cpp $(DST_DIR)/addr.book.pb.cc -I$(DST_DIR) -lprotobuf
+
+    reader:
+        $(CC) -o reader reader.cpp $(DST_DIR)/addr.book.pb.cc -I$(DST_DIR) -lprotobuf
+
+    clean:
+        rm -rf $(DST_DIR)
+        rm -f writer reader log
+        rm -f *.o
+
+运行效果：
+::
+
+    [root@localhost proto1]# ./writer
+    [root@localhost proto1]# ./reader
+    101
+    book1
+    [root@localhost proto1]#
+
+
+Go示例代码
+----------------------------------------
+
+yum install golang-googlecode-goprotobuf.x86_64
+
+将proto文件转换为go代码（genPbCode.sh）：
+::
+
+    #! /bin/sh
+
+    mkdir -p src/addr
+    protoc -I=. --go_out=src/addr addr.book.proto
+
+修改protobuf路径：
+::
+    
+    vi src/addr/addr.book.pb.go
+    
+    import proto "code.google.com/p/goprotobuf/proto"
+    
+    修改为：
+    
+    import proto "github.com/golang/protobuf/proto"
+
+
+添加PATH（临时使用时可以这么操作）:    
+::
+    
+    export GOPATH=$GOPATH:$PWD
+
+写文件操作（write.go）：    
+::
+
+    package main
+
+    import (
+        "github.com/golang/protobuf/proto"
+        "addr"
+        "fmt"
+        "os"
+    )
+
+    func main() {
+        test := &addr.Book{
+            Id : proto.Int32(11),
+            Str : proto.String("testMsg11"),
+        }
+
+        data, err := proto.Marshal(test)
+        if err != nil {
+            fmt.Printf("marshaling error: ", err)
+        }else{
+            //fmt.Println(data)
+            f,_ := os.Create("log")
+            defer f.Close()
+            _, _ = f.Write(data)
+        }
+
+    }
+
+
+读文件操作（reader.go）：
+::    
+
+    package main
+
+    import (
+        "github.com/golang/protobuf/proto"
+        "addr"
+        "fmt"
+        "os"
+    )
+
+    func main() {
+        userFile := "log"
+        newTest := &addr.Book{}
+
+        fin,err := os.Open(userFile)
+        defer fin.Close()
+        if err != nil {
+            fmt.Println(userFile,err)
+            return
+        }
+        buf := make([]byte, 1024)
+        n,_ := fin.Read(buf)
+
+        err = proto.Unmarshal(buf[:n], newTest)
+        if err != nil {
+            fmt.Printf("unmarshaling error: ", err)
+        }else{
+            fmt.Println(newTest)
+        }
+
+    }
+
+运行效果：
+::
+
+    [root@localhost proto3]# go run write.go
+    [root@localhost proto3]# go run read.go
+    id:11 str:"testMsg11"
+    [root@localhost proto3]#
+    
+
+
+Python示例
+----------------------------------------
+    
+需要安装protobuf包：
+::
+    
+    pip install protobuf
+
+将proto文件转换为python代码（genPbCode.sh）：
+::
+
+    #! /bin/sh
+
+    protoc -I=. --python_out=. addr.book.proto
+    touch addr/__init__.py
+
+写文件操作（write.py）：    
+::
+
+    #! /usr/bin/env python
+    #-*- coding:utf-8 -*-
+
+    import addr.book_pb2 as book_pb2
+    import google.protobuf
+
+    msg1 = book_pb2.book()
+    msg1.id = 1
+    msg1.str = "testMsg1"
+    #print msg1
+
+    msgBinary = msg1.SerializeToString()
+
+    with open("log", "wb") as f:
+        f.write(msgBinary)
+
+读文件操作（reader.py）：
+::
+
+    #! /usr/bin/env python
+    #-*- coding:utf-8 -*-
+
+    import addr.book_pb2 as book_pb2
+    import google.protobuf
+
+    msg1 = book_pb2.book()
+    msgBinary = None
+    with open("log", "rb") as f:
+        msgBinary = f.read()
+
+    if msgBinary :
+        msg1.ParseFromString(msgBinary)
+
+    print msg1
+
+运行效果：
+::
+
+    (py27env) [root@localhost proto2]# ./genPbCode.sh
+    (py27env) [root@localhost proto2]# python write.py
+    (py27env) [root@localhost proto2]# python reader.py
+    id: 1
+    str: "testMsg1"
+
+    (py27env) [root@localhost proto2]#
+
+
+ 
