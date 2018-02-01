@@ -134,6 +134,8 @@ Makefile文件：
 
 Go示例代码
 ----------------------------------------
+安装goprotobuf:
+::
 
 yum install golang-googlecode-goprotobuf.x86_64
 
