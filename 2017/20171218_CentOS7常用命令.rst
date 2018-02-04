@@ -49,6 +49,18 @@ CentOS7常用命令
     Permissive
     -------------------
 
+安装pgsql(9.6) ：
+::
+
+    yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-6-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+    yum install postgresql96
+    yum install postgresql96-server
+
+    /usr/pgsql-9.6/bin/postgresql96-setup initdb
+    systemctl enable postgresql-9.6
+    systemctl start postgresql-9.6
+    
+    
 安装tmux ：
 ::
     
