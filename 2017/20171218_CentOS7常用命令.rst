@@ -49,6 +49,22 @@ CentOS7常用命令
     Permissive
     -------------------
 
+设置运行级别:
+::
+    
+    # multi-user.target类似于runlevel 3;
+    # graphical.target类似于runlevel5
+
+    #查看默认运行级别的方式为
+    systemctl get-default
+
+    #设置默认运行级别的方式
+    systemctl set-default multi-user.target # 多用户级别
+    systemctl set-default graphical.target # 图形用户级别
+    
+    
+    
+    
 安装pgsql(9.6) ：
 ::
 
