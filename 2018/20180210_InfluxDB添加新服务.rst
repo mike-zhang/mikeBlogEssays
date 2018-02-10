@@ -1,0 +1,265 @@
+InfluxDB添加新服务
+===================================================
+
+操作系统 ： CentOS7.3.1611_x64
+
+go语言版本：1.8.3 linux/amd64
+
+InfluxDB版本：1.1.0
+
+这里以添加 syncd 服务为例记录下InfluxDB添加新服务的流程。
+
+
+添加主服务代码
+--------------------------------------
+
+在 influxdata/influxdb/services 目录建立 syncd 文件夹，用于存放 syncd 服务相关代码。
+
+1、添加服务配置相关内容
+
+添加 config.go 文件，示例内容如下：
+::
+
+    package syncd
+
+    type Config struct {
+            Enabled        bool   `toml:"enabled"`
+            LogEnabled     bool   `toml:"log-enabled"`
+            RemoteTSDBHost string `toml:"remote-host"`
+            DefaultDB      string `toml:"defaultDB"`
+    }
+
+    func NewConfig() Config {
+            return Config{
+                    Enabled:        true,
+                    LogEnabled:     true,
+                    RemoteTSDBHost: "http://127.0.0.1:8086",
+                    DefaultDB:      "Monitor",
+            }
+    }
+
+解释如下：
+    
+* 定义 Config 用于存放具体配置；
+
+* 添加 NewConfig 函数，用于创建 Config 对象；  
+
+2、添加 syncd 服务的具体内容
+    
+添加 syncd.go 文件，示例内容如下：
+::
+
+    package syncd
+
+    import (
+            "log"
+            "os"
+            "time"
+    )
+
+    type Service struct {
+            Logger      *log.Logger
+            remote_host string
+            DefaultDB   string
+            username    string
+            password    string
+    }
+
+    func NewService(c Config) *Service {
+            return &Service{
+                    remote_host: c.RemoteTSDBHost,
+                    DefaultDB:   c.DefaultDB,
+                    username:    "root",
+                    password:    "root",
+                    Logger:      log.New(os.Stderr, "[syncd] ", log.LstdFlags),
+            }
+    }
+    
+    func (s *Service) Run() {
+        for {
+                cur_time := time.Now().Unix()
+                s.Logger.Printf("current timestamp : %d\n", cur_time)
+                time.Sleep(1 * time.Second)
+        }
+    }
+
+解释如下：
+* 定义Service结构；
+
+* 添加 NewService 函数，用于创建具体服务；
+    
+* 添加 Run 函数，实现具体服务
+
+该函数作为入口实现具体的服务，这里以在日志中定时打印时间戳作为具体的服务内容。     
+
+在服务器主程序中启动服务
+--------------------------------------
+
+1、添加配置相关代码
+
+进入 influxdata/influxdb/cmd/influxd 目录，修改 run/config.go 文件。 
+
+* 引入 syncd 服务
+
+在 import 中加入如下代码：
+::
+
+    "github.com/influxdata/influxdb/services/syncd"
+
+    
+* 定义配置
+
+在 Config 结构中加入如下变量：
+::
+
+    SyncdConfig    syncd.Config      `toml:"syncd"`
+
+* 初始化配置
+
+在 NewConfig 函数中加入如下代码：
+::
+
+    c.SyncdConfig = syncd.NewConfig()
+
+使用 git diff 命令查看如下 ：
+::
+
+    [root@localhost run]# git diff config.go
+    diff --git a/cmd/influxd/run/config.go b/cmd/influxd/run/config.go
+    index 36e4f14..01df0cc 100644
+    --- a/cmd/influxd/run/config.go
+    +++ b/cmd/influxd/run/config.go
+    @@ -27,6 +27,7 @@ import (
+            "github.com/influxdata/influxdb/services/precreator"
+            "github.com/influxdata/influxdb/services/retention"
+            "github.com/influxdata/influxdb/services/subscriber"
+    +       "github.com/influxdata/influxdb/services/syncd"
+            "github.com/influxdata/influxdb/services/udp"
+            "github.com/influxdata/influxdb/tsdb"
+     )
+    @@ -48,6 +49,7 @@ type Config struct {
+            Monitor        monitor.Config    `toml:"monitor"`
+            Subscriber     subscriber.Config `toml:"subscriber"`
+            HTTPD          httpd.Config      `toml:"http"`
+    +       SyncdConfig    syncd.Config      `toml:"syncd"`
+            GraphiteInputs []graphite.Config `toml:"graphite"`
+            CollectdInputs []collectd.Config `toml:"collectd"`
+            OpenTSDBInputs []opentsdb.Config `toml:"opentsdb"`
+    @@ -84,6 +86,7 @@ func NewConfig() *Config {
+            c.Retention = retention.NewConfig()
+            c.BindAddress = DefaultBindAddress
+
+    +       c.SyncdConfig = syncd.NewConfig()
+            return c
+     }
+
+    [root@localhost run]#
+
+    
+
+2、添加启动服务代码
+
+进入 influxdata/influxdb/cmd/influxd 目录，修改 run/command.go 文件
+
+* 引入 syncd 服务
+
+在 import 中加入如下代码：
+::
+
+    "github.com/influxdata/influxdb/services/syncd"
+
+* 添加启动代码
+
+在 Command->Run 函数中加入如下代码（go cmd.monitorServerErrors() 之前）：
+::
+
+    // start syncd
+    syncdInstance := syncd.NewService(config.SyncdConfig)
+    go syncdInstance.Run()
+
+
+
+在 Config 结构中加入如下变量：
+
+使用 git diff 命令查看如下 ：
+::
+
+    [root@localhost run]# git diff command.go
+    diff --git a/cmd/influxd/run/command.go b/cmd/influxd/run/command.go
+    index 51036f1..8743f04 100644
+    --- a/cmd/influxd/run/command.go
+    +++ b/cmd/influxd/run/command.go
+    @@ -1,6 +1,7 @@
+     package run
+
+     import (
+    +    "github.com/influxdata/influxdb/services/syncd"
+            "flag"
+            "fmt"
+            "io"
+    @@ -120,6 +121,11 @@ func (cmd *Command) Run(args ...string) error {
+            }
+            cmd.Server = s
+
+    +    // start syncd
+    +       syncdInstance := syncd.NewService(config.SyncdConfig)
+    +       go syncdInstance.Run()
+    +
+    +
+            // Begin monitoring the server's error channel.
+            go cmd.monitorServerErrors()
+
+    [root@localhost run]#
+
+
+测试服务
+--------------------------------------
+
+进入 influxdata/influxdb/cmd/influxd 目录，执行 go build 命令，并将编译好的二进制文件copy到bin目录，具体如下：
+::
+
+    [root@localhost influxd]# go build
+    [root@localhost influxd]# cp influxd /usr/bin/
+    cp: overwrite ‘/usr/bin/influxd’? y
+    [root@localhost influxd]#
+
+启动InfluxDB服务器，在控制台可以看到如下内容：
+::
+
+    [root@localhost influxdb]# influxd
+
+     8888888           .d888 888                   8888888b.  888888b.
+       888            d88P"  888                   888  "Y88b 888  "88b
+       888            888    888                   888    888 888  .88P
+       888   88888b.  888888 888 888  888 888  888 888    888 8888888K.
+       888   888 "88b 888    888 888  888  Y8bd8P' 888    888 888  "Y88b
+       888   888  888 888    888 888  888   X88K   888    888 888    888
+       888   888  888 888    888 Y88b 888 .d8""8b. 888  .d88P 888   d88P
+     8888888 888  888 888    888  "Y88888 888  888 8888888P"  8888888P"
+
+    [run] 2018/02/07 04:24:28 InfluxDB starting, version unknown, branch unknown, commit unknown
+    [run] 2018/02/07 04:24:28 Go version go1.8.3, GOMAXPROCS set to 2
+    [run] 2018/02/07 04:24:28 Using configuration at: /etc/influxdb/influxdb.conf
+    [store] 2018/02/07 04:24:29 Using data dir: /var/lib/influxdb/data
+   
+    ...
+
+    [syncd] 2018/02/07 21:56:11 current timestamp : 1518058571
+    [syncd] 2018/02/07 21:56:12 current timestamp : 1518058572
+    [syncd] 2018/02/07 21:56:13 current timestamp : 1518058573
+
+
+生成新的配置文件：
+::
+
+    influxd config > new.conf
+
+可以看到 syncd 服务默认配置如下：
+::
+
+    [syncd]
+      enabled = true
+      log-enabled = true
+      remote-host = "http://127.0.0.1:8086"
+      defaultDB = "Monitor"
+
