@@ -92,5 +92,15 @@ tmux 防止session名字过长 ：
 
     
 安装epel ：
-
+::
+    
     rpm -ivh http://mirrors.ustc.edu.cn/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
+    
+
+设置时区 ：
+::
+    
+    timedatectl set-timezone Asia/Shanghai
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+    
