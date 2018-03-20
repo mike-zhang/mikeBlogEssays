@@ -1,0 +1,64 @@
+浮点数网络传输
+===================================================
+
+操作系统 ： CentOS7.3.1611_x64
+
+gcc版本 ：4.8.5
+
+Python 版本 : 2.7.5
+
+
+思路如下 ：
+
+1、将浮点数a通过内存拷贝，赋值给相同字节的整型数据b；
+
+2、将b转换为网络字节序变量c并发送到服务端；
+
+3、服务端接收c并将c转换为主机字节序变量d；
+
+4、将整型数据d通过内存拷贝，赋值给相同字节的浮点数据e；
+
+至此，浮点数网络传输完成。
+
+C示例代码：
+::
+
+    #define htonl64 htobe64
+    #define ntohl64 be64toh
+
+    uint64_t htonf64(double dvalue)
+    {
+        uint64_t ulltmp = 0;
+        memcpy(&ulltmp,&dvalue,8);
+        ulltmp = htonl64(ulltmp);
+        return ulltmp;
+    }
+
+    double ntohf64(uint64_t ulvalue)
+    {
+        uint64_t ulltmp = 0;
+        double ret = 0.0;
+        ulltmp = ntohl64(ulvalue);
+        memcpy(&ret,&ulltmp,8);
+        return ret;
+    }
+    
+完整示例代码如下：        
+    
+https://github.com/mike-zhang/cppExamples/blob/master/socketOpt/byteOrder/double_test1.c    
+
+python示例代码 ：
+::
+    
+    def htonfl(f):
+        s = struct.pack('d',f)
+        return struct.unpack('!Q',s)[0]
+
+    def fltonl(v):
+        s = struct.pack('!Q',v)
+        return struct.unpack('d',s)[0]
+        
+完整示例代码如下：        
+    
+https://github.com/mike-zhang/pyExamples/blob/master/socketRelate/byteOrder_double1.py
+
