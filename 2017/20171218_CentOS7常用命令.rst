@@ -103,4 +103,9 @@ tmux 防止session名字过长 ：
     timedatectl set-timezone Asia/Shanghai
     cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
+安装gcc等开发工具 ：
+::
+    
+    yum groupinstall "Development Tools"    
+    
     
