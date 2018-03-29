@@ -24,7 +24,7 @@ CentOS7常用命令
     
     iptables -I INPUT -s 192.168.1.123 -j DROP
     
-配置防火墙，运行单个ip地址访问：    
+配置防火墙，允许单个ip地址访问：    
 ::
     
     iptables -I INPUT -s 192.168.1.123 -j ACCEPT
