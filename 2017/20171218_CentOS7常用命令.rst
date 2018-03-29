@@ -19,7 +19,16 @@ CentOS7常用命令
     
  yum install net-tools    
 
-
+配置防火墙，阻止单个ip地址访问：
+::
+    
+    iptables -I INPUT -s 192.168.1.123 -j DROP
+    
+配置防火墙，运行单个ip地址访问：    
+::
+    
+    iptables -I INPUT -s 192.168.1.123 -j ACCEPT
+ 
 关闭防火墙:
 ::
 
