@@ -1,0 +1,85 @@
+批量替换多文件字符串问题
+===================================================
+
+操作系统 ： CentOS7.3.1611_x64
+Python 版本 : 2.7.5
+
+问题描述
+--------------------------------------
+
+编码过程中有时候会遇到在多个源文件中存在同一个变量名（比如 ： writeBuffer），需要替换为新的变量名（比如 ： write_buffer）的问题。
+怎么能方便快捷的解决该问题呢？
+
+    
+解决方案
+--------------------------------------
+
+使用sed
+`````````````````````````````````````````````````
+  
+sed和grep结合使用可以替换当前文件夹多个文件的内容。
+
+格式 ：
+::
+
+    sed -i 's/原字符串/新字符串/g' `grep  -rl 原字符串 所在目录`
+
+示例代码：
+::
+    
+    sed -i 's/writeBuffer/write_buffer/g' `grep -rl writeBuffer  ./*`
+  
+
+使用Python
+`````````````````````````````````````````````````
+使用Python脚本可以实现替换当前文件夹多个文件的内容。
+
+替换单个文件的代码如下：
+::
+    
+    def doReplace(fpath,src,dst):
+        newConent,bFlag = "",False
+        with open(fpath,"rb") as fin:
+            for line in fin :
+                if line.find(src) == -1 :
+                    newLine = line
+                else:
+                    bFlag = True
+                    newLine = line.replace(src,dst)
+                newConent += newLine
+        if not bFlag : return None
+        print fpath
+        with open(fpath,"wb") as fout:
+            fout.write(newConent)
+        return None
+
+替换多个文件仅需添加目录遍历代码。
+        
+完整示例代码如下：
+
+https://github.com/mike-zhang/pyExamples/blob/master/tools/replaceMulti.py
+
+添加可执行权限：
+::
+
+    chmod a+x replaceMulti.py
+
+使用示例：
+::
+
+    ./replaceMulti.py writeBuffer write_buffer
+
+将当前文件夹中所有 writeBuffer 替换为 write_buffer
+
+也可以将 replaceMulti.py 放入 /usr/local/bin/ 目录：
+::
+
+    [root@local ~]# mv replaceMulti.py /usr/local/bin/
+    [root@local ~]# replaceMulti.py
+    usage : replaceMulti srcStr dstStr
+    replace current dir files
+    [root@local ~]#
+
+该脚本在windows下也可以使用，将 replaceMulti.py 所在目录加入环境变量即可。
+
+   
