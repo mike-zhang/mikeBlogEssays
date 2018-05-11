@@ -72,8 +72,6 @@ CentOS7常用命令
     systemctl set-default graphical.target # 图形用户级别
     
     
-    
-    
 安装pgsql(9.6) ：
 ::
 
@@ -104,8 +102,34 @@ tmux 防止session名字过长 ：
 ::
     
     rpm -ivh http://mirrors.ustc.edu.cn/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
-    
 
+
+通过光盘安装软件
+::
+
+    1、挂载iso文件
+    
+    mount CentOS-7-x86_64-Everything-1611.iso /mnt -o loop
+    
+    如果是使用光驱则执行如下命令： mount /dev/cdrom /mnt -o loop
+
+    2、修改yum配置
+    
+        vi /etc/yum.repos.d/CentOS-Media.repo
+
+        [c7-media]
+        name=CentOS-$releasever - Media
+        baseurl=file:///media/CentOS/
+                file:///media/cdrom/
+                file:///media/cdrecorder/
+                file:///mnt/
+
+    3、搜索并安装
+    
+        yum --disablerepo=\* --enablerepo=c7-media search cmake
+        yum --disablerepo=\* --enablerepo=c7-media install cmake
+
+    
 设置时区 ：
 ::
     
@@ -115,6 +139,6 @@ tmux 防止session名字过长 ：
 安装gcc等开发工具 ：
 ::
     
-    yum groupinstall "Development Tools"    
+    yum groupinstall "Development Tools"
     
     
