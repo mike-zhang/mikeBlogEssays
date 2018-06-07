@@ -115,6 +115,10 @@ sql语句示例代码
     psql
     \c testdb 
     
+或者 : 
+::
+
+    psql -U postgres -d testdb    
 
 使用public schema：
 
