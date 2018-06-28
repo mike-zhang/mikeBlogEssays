@@ -1,0 +1,64 @@
+C语言结构体变量私有化
+===================================================
+
+操作系统 ： CentOS7.3.1611_x64
+
+gcc版本 ：4.8.5
+
+问题描述
+--------------------------------------
+
+C语言结构体定义中的变量默认是公有（Public）属性，如果实现成员变量的私有（Private）化？
+    
+解决方案
+--------------------------------------
+将结构体的定义放入源码件中实现，头文件只放声明。
+
+比如有如下结构体（obj.h文件中定义）：
+::
+    
+    struct Obj {
+        int id;
+        char *name;
+    };
+    typedef struct Obj Obj; 
+
+并定义如下变量：
+::
+    
+    Obj *o;
+
+正常情况下，可以通过如下代码正常访问结构体中的变量：
+::
+    
+    printf("id : %d\n",o->id);
+        
+如果将结构体的定义放入源文件中，上述代码将会报如下错误：
+::
+
+    error: dereferencing pointer to incomplete type
+       printf("id : %d\n",o->id);
+
+
+如需外部访问，可通过添加相关接口实现，比如：
+::
+
+    int get_obj_id(const Obj* o)
+    {
+        int ret = 0;
+        if(o)
+        {
+            ret = o.id;
+        }
+        return ret;
+    }
+
+完整示例代码如下：
+
+    https://github.com/mike-zhang/cppExamples/tree/master/dataTypeOpt/CStructPrivateTest1
+    
+    
+
+
+   
+    
