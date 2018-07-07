@@ -141,4 +141,22 @@ tmux 防止session名字过长 ：
     
     yum groupinstall "Development Tools"
     
+putty终端文件夹蓝色显示问题：
+::
+
+    /etc/DIR_COLORS
+
+    DIR 01;34   修改为 ： DIR 01;94     
+    
+    dircolors /etc/DIR_COLORS
+    
+    需要putty重新连接
+    
+tmux文件夹蓝色显示问题需要在上面命令的基础上如下操作：
+::
+
+    export TERM="screen-256color"
+    alias tmux="tmux -2"
+    
+    
     
