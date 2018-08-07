@@ -161,3 +161,12 @@ tmux文件夹蓝色显示问题需要在上面命令的基础上如下操作（.
     fi
     
     
+下载软件离线安装包：
+::
+
+    yum install --downloadonly --downloaddir=/tmp/ libuuid-devel
+    
+    （前提是该软件之前未安装过，否则上述命令不成功）
+
+    
+    
