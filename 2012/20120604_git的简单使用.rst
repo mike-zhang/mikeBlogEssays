@@ -145,6 +145,17 @@ Windwos下安装
 ::
 
     git push
+    
+在使用git push 代码到数据仓库时，提示如下错误:
+::
+
+    [remote rejected] master -> master (branch is currently checked out)
+
+这是由于git默认拒绝了push操作，需要在服务端进行设置，修改.git/config文件后面添加如下代码：
+::
+
+    [receive]
+    　　　　denyCurrentBranch = ignore     
 
 放弃单个文件的修改
 `````````````````````````````````````````````````
@@ -165,5 +176,10 @@ Windwos下安装
     git reset --hard origin/master
 
 
-    
+让 git 输出彩色
+`````````````````````````````````````````````````
+git config --global color.status auto 
+git config --global color.diff auto 
+git config --global color.branch auto 
+git config --global color.interactive auto    
     
