@@ -46,7 +46,7 @@
 ::
 
 	cat id_rsa_test1.pub >> authorized_keys
-    
+	
 ssh访问测试
 --------------------------------------
 
@@ -66,16 +66,17 @@ linux配置
 
 2、配置config文件
 
+文件路径：~/.ssh/config  
+
+添加如下代码（192.168.1.100为git服务器ip）
 ::
 
-	cd ~/.ssh/  
-	vi config  
-	添加如下代码（192.168.1.100为git服务器ip）：  
 	Host host100
-        Hostname 192.168.1.100
-        User root
-        IdentityFile /tmp/id_rsa_test1
-            
+		Hostname 192.168.1.100
+		User root
+		IdentityFile /tmp/id_rsa_test1
+
+
 3、git访问  
 
 配置完成后，通过以下命令访问，都无需密码：
