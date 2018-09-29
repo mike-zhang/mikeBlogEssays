@@ -3,28 +3,33 @@ CentOS7常用命令
 
 操作系统 ： CentOS7.3.1611_x64   
   
-  
-查看ip ：
+
+配置IP
+--------------------------------------  
+查看ip 
 ::
 
     ip addr
 
-设置ip信息 ：
+设置ip信息
 ::
 
     nmtui
     
-安装ifconfig工具：
+安装ifconfig工具
 ::
     
  yum install net-tools    
 
-配置防火墙，阻止单个ip地址访问：
+配置防火墙
+--------------------------------------
+阻止单个ip地址访问
 ::
     
     iptables -I INPUT -s 192.168.1.123 -j DROP
     
-配置防火墙，允许单个ip地址访问：    
+允许单个ip地址访问
+   
 ::
     
     iptables -I INPUT -s 192.168.1.123 -j ACCEPT
@@ -41,6 +46,8 @@ CentOS7常用命令
     firewall-cmd --zone=public --add-port=80/tcp --permanent
     firewall-cmd --reload
 
+配置selinux
+--------------------------------------    
 关闭selinux ：
 ::
 
@@ -58,6 +65,9 @@ CentOS7常用命令
     Permissive
     -------------------
 
+设置系统运行级别
+--------------------------------------
+    
 设置运行级别:
 ::
     
@@ -71,7 +81,8 @@ CentOS7常用命令
     systemctl set-default multi-user.target # 多用户级别
     systemctl set-default graphical.target # 图形用户级别
     
-    
+pgsql相关
+--------------------------------------    
 安装pgsql(9.6) ：
 ::
 
@@ -83,6 +94,8 @@ CentOS7常用命令
     systemctl enable postgresql-9.6
     systemctl start postgresql-9.6
     
+tmux相关
+--------------------------------------  
     
 安装tmux ：
 ::
@@ -96,9 +109,30 @@ tmux 防止session名字过长 ：
     set-option -g allow-rename off
 
     重启tmux
-
     
-安装epel ：
+
+putty终端文件夹蓝色显示问题：
+::
+
+    /etc/DIR_COLORS
+
+    DIR 01;34   修改为 ： DIR 01;94     
+    
+    dircolors /etc/DIR_COLORS
+    
+    需要putty重新连接
+    
+tmux文件夹蓝色显示问题需要在上面命令的基础上如下操作（.bashrc中添加）：
+::
+
+    alias tmux="tmux -2"
+    if [ "$TERM" != "xterm-256color" ]; then
+        export TERM=xterm-256color
+    fi    
+
+yum 相关
+--------------------------------------      
+安装epel 源：
 ::
     
     rpm -ivh http://mirrors.ustc.edu.cn/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
@@ -129,36 +163,10 @@ tmux 防止session名字过长 ：
         yum --disablerepo=\* --enablerepo=c7-media search cmake
         yum --disablerepo=\* --enablerepo=c7-media install cmake
 
-    
-设置时区 ：
-::
-    
-    timedatectl set-timezone Asia/Shanghai
-    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
 安装gcc等开发工具 ：
 ::
     
     yum groupinstall "Development Tools"
-    
-putty终端文件夹蓝色显示问题：
-::
-
-    /etc/DIR_COLORS
-
-    DIR 01;34   修改为 ： DIR 01;94     
-    
-    dircolors /etc/DIR_COLORS
-    
-    需要putty重新连接
-    
-tmux文件夹蓝色显示问题需要在上面命令的基础上如下操作（.bashrc中添加）：
-::
-
-    alias tmux="tmux -2"
-    if [ "$TERM" != "xterm-256color" ]; then
-        export TERM=xterm-256color
-    fi
     
     
 下载软件离线安装包：
@@ -168,5 +176,37 @@ tmux文件夹蓝色显示问题需要在上面命令的基础上如下操作（.
     
     （前提是该软件之前未安装过，否则上述命令不成功）
 
+
+ramdisk 相关
+--------------------------------------------------------
+
+1、临时创建
+::
+
+    mkdir /tmp/ramdisk
+    sudo mount -t tmpfs -o size=1024m tmpfs /tmp/ramdisk    
+
+    
+2、开机启动创建
+::
+
+    vi /etc/fstab
+    
+    tmpfs   /tmp/ramdisk tmpfs   nodev,nosuid,noexec,nodiratime,size=1024M   0 0
+
+可以通过 df -h 看下映射结果 
+
+也可以直接使用 /dev/shm ，通过软连接指向该目录即可使用，比如：
+::
+
+    ln /dev/shm/ -s log
+
+其它
+--------------------------------------------------------        
+设置时区 ：
+::
+    
+    timedatectl set-timezone Asia/Shanghai
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     
     
