@@ -16,7 +16,6 @@ github地址： https://github.com/sphinx-doc/sphinx
 --------------------------------------
 
 使用pip安装：
-`````````````````````````````````````````````````
 ::
 
     pip install -U Sphinx
