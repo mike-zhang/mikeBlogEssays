@@ -1,0 +1,100 @@
+使用Sphinx编写文档
+===================================================
+
+操作系统 ： Windows7_x64
+
+Python 版本 : 2.7.10
+
+Sphinx 版本 : 
+
+官方网址：http://sphinx-doc.org
+
+github地址： https://github.com/sphinx-doc/sphinx
+
+
+安装Sphinx
+--------------------------------------
+
+使用pip安装：
+`````````````````````````````````````````````````
+::
+
+    pip install -U Sphinx
+    pip install sphinx_rtd_theme
+
+从源码安装：
+::
+
+    git clone https://github.com/sphinx-doc/sphinx
+    cd sphinx
+    pip install .
+    
+
+使用Sphinx
+--------------------------------------
+
+创建项目
+`````````````````````````````````````````````````
+在控制台输入以下命令：
+
+    sphinx-quickstart
+    
+根据实际情况填写。   
+
+   
+编写项目    
+`````````````````````````````````````````````````    
+    
+index.rst示例代码：
+
+::
+
+    .. _tutorial-index:
+
+    .. highlight:: python
+        :linenothreshold: 0
+
+    sphinx示例文档
+    =============
+    :Release: |version|
+    :Date: |today|
+
+    欢迎阅读sphinx示例文档
+    =============================================
+
+    内容示例:
+
+    .. toctree::
+       :maxdepth: 2
+
+       test1.rst 
+
+
+index.rst 为主文件
+
+test1.rst 为具体内容
+
+test1.rst示例内容：
+::
+
+    rst语法简介
+    ===========
+
+    空行分段
+    ----------
+    第一段内容。
+
+    第二段和第一段间有空行。
+    
+    
+    
+编译项目
+`````````````````````````````````````````````````
+生成html文档
+::  
+  
+    sphinx-build -b html source/ build/
+
+
+    
+    
