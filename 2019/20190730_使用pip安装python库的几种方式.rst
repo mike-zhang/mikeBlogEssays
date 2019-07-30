@@ -23,6 +23,7 @@ Python 版本 : 3.6.8
     
     
 1.2 安装多个package
+
 示例如下：
 ::
 
@@ -70,6 +71,13 @@ req.txt 可以通过以下命令获取：
 
     [admin@localhost .pip]$
     
+也可以使用自建pip源，或者其它公开pip源，比如：
+::
+
+    阿里云 http://mirrors.aliyun.com/pypi/simple/
+    豆瓣(douban) http://pypi.douban.com/simple/ 
+    清华大学 https://pypi.tuna.tsinghua.edu.cn/simple/
+    中国科学技术大学 http://pypi.mirrors.ustc.edu.cn/simple/
 
 2、从源码安装
 -------------------------------------------------------------
