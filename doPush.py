@@ -5,7 +5,7 @@ import os
 
 def doGitPush():
     bNameAll = os.popen("git branch -l").read()
-    #print bNameAll
+    print(bNameAll)
     bName = ""
     for item in bNameAll.split('\n'):            
         if item[0] == '*' :
@@ -13,9 +13,9 @@ def doGitPush():
             break
     #print bName
     bName = bName.split()[-1]
-    print bName
+    print(bName)
     strCmd = "git push origin %s" % bName
-    print strCmd
+    print(strCmd)
     os.system(strCmd)
 
 doGitPush()
