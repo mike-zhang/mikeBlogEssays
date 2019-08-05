@@ -57,7 +57,7 @@ req.txt 可以通过以下命令获取：
 
 方式二：通过修改配置文件永久修改pip源
 
-文件： ~/.pip/pip.conf
+文件(Linux)： ~/.pip/pip.conf
 
 比如使用阿里云的pip源：
 ::
@@ -78,6 +78,12 @@ req.txt 可以通过以下命令获取：
     豆瓣(douban) http://pypi.douban.com/simple/ 
     清华大学 https://pypi.tuna.tsinghua.edu.cn/simple/
     中国科学技术大学 http://pypi.mirrors.ustc.edu.cn/simple/
+
+Windows对应文件： 
+::
+
+	C:\Users\用户名\AppData\Roaming\pip\pip.ini
+
 
 2、从源码安装
 -------------------------------------------------------------
