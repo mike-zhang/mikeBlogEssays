@@ -101,6 +101,18 @@ Windows对应文件：
 
     pip install SomePackage.whl
     
+其它
+--------------------------------------------------------
+1、pip下载离线安装包
+
+命令示例：
+::
+
+    下载命令：
+    pip download -d /tmp/packs -r requirement.txt -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+
+    安装命令：
+    pip install --no-index --find-links=/tmp/packs -r requirement.txt 
 
 
 
