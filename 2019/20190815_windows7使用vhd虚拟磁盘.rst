@@ -22,7 +22,7 @@ windows7使用vhd虚拟磁盘
     diskpart /s "%tmp%\vhd.sh"
     pause
 
-Python代码：
+Python版本：
 
 https://github.com/mike-zhang/pyExamples/blob/master/tools/vhdFileOpt/load_vhd.py
     
@@ -39,6 +39,6 @@ https://github.com/mike-zhang/pyExamples/blob/master/tools/vhdFileOpt/load_vhd.p
     diskpart /s "%tmp%\vhd.sh"
     pause
 
-Python代码：
+Python版本：
 
 https://github.com/mike-zhang/pyExamples/blob/master/tools/vhdFileOpt/unload_vhd.py
