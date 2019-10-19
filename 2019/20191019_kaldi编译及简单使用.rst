@@ -1,0 +1,87 @@
+kaldi简介及安装
+===================================================
+
+操作系统 ： CentOS7.6.1810_x64
+
+gcc版本 ：4.8.5
+
+
+简介
+--------------------------------------
+
+
+Kaldi诞生于2009年的JohnsHopkins University，刚开始项目重点是子空间高斯模型（SGMM）建模和词汇学习抽样调查，代码也是基于HTK进行的开发，现在也是C++作为主要语言。但是随着更多参与者的加入，特别是对深度神经网络（DNN）的支持，让Kaldi的发展超过了其他几个著名开源项目。更重要的是Kaldi的维护和更新非常及时，基本上每天都有新的进展报告，而且在跟进学术研究的新算法方面也更加快速。国外很多公司和研究机构也都在用Kaldi平台，当然国内更多的公司，其实也是基于这个平台做的改进，特别是最近几年新兴的公司和企业研究院。
+
+
+官方网址： http://kaldi-asr.org/
+
+github地址： https://github.com/kaldi-asr/kaldi
+
+
+编译
+--------------------------------------
+获取源码：
+
+git clone https://github.com/kaldi-asr/kaldi
+
+查看安装步骤：
+:: 
+    [root@local src]# cat kaldi/INSTALL
+    This is the official Kaldi INSTALL. Look also at INSTALL.md for the git mirror installation.
+    [for native Windows install, see windows/INSTALL]
+
+    (1)
+    go to tools/  and follow INSTALL instructions there.
+
+    (2)
+    go to src/ and follow INSTALL instructions there.
+
+    [root@local src]#
+
+
+即：
+1、进入 tools 目录，按照 INSTALL 的说明进行安装；
+::
+
+    执行 extras/check_dependencies.sh 检查依赖项，根据提示进行安装；
+    然后执行 make -j 8 命令进行make（其中8是make时的并发数，可根据cpu数量修改）;
+
+2、安装好 tools 目录内容后，进入 src 目录，按照 INSTALL 的说明进行安装；
+::
+    
+    ./configure --shared
+    make depend -j 8
+    make -j 8
+
+其中8是make时的并发数，可根据cpu数量修改
+
+
+使用示例
+--------------------------------------
+
+目录： kaldi/egs/yesno
+
+训练文件： http://www.openslr.org/resources/1/waves_yesno.tar.gz
+
+运行脚本：
+::
+
+    source path.sh
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/root/src/kaldi/tools/openfst/lib
+    ./run.sh
+
+正常结束：
+::
+    
+    ...
+    local/score.sh --cmd utils/run.pl data/test_yesno exp/mono0a/graph_tgpr exp/mono0a/decode_test_yesno
+    local/score.sh: scoring with word insertion penalty=0.0,0.5,1.0
+    %WER 0.00 [ 0 / 232, 0 ins, 0 del, 0 sub ] exp/mono0a/decode_test_yesno/wer_10_0.0
+
+如果下载源码或训练文件过慢，可从我分享的链接中获取。
+
+本文对应资源地址：https://pan.baidu.com/s/1ygrlvjgAcw0cXpQpIjNQIQ&shfl=sharepset
+
+可关注微信公众号后回复 19101901  获取提取码。
+
+	
