@@ -1,0 +1,240 @@
+kaldi使用thchs30数据进行训练并执行识别操作
+===================================================
+
+操作系统 ： Ubutu18.04_x64
+
+gcc版本 ：7.4.0
+
+数据准备及训练
+--------------------------------------
+
+数据地址： http://www.openslr.org/18/
+
+
+在 egs/thchs30/s5 建立 thchs30-openslr 文件夹，然后把三个文件解压在了该文件夹下：
+::
+
+    [mike@local thchs30-openslr]$ pwd
+    /home/mike/src/kaldi/egs/thchs30/s5/thchs30-openslr
+    [mike@local thchs30-openslr]$ tree -L 2
+    .
+    ├── data_thchs30
+    │   ├── data
+    │   ├── dev
+    │   ├── lm_phone
+    │   ├── lm_word
+    │   ├── README.TXT
+    │   ├── test
+    │   └── train
+    ├── resource
+    │   ├── dict
+    │   ├── noise
+    │   └── README
+    └── test-noise
+        ├── 0db
+        ├── noise
+        ├── noise.scp
+        ├── README
+        ├── test.scp
+        └── utils
+
+    14 directories, 5 files
+    [mike@local thchs30-openslr]$
+
+进入 s5 目录，修改脚本：
+
+
+修改cmd.sh脚本，把原脚本注释掉，修改为本地运行：
+::
+
+    export train_cmd=run.pl
+    export decode_cmd="run.pl --mem 4G"
+    export mkgraph_cmd="run.pl --mem 8G"
+    export cuda_cmd="run.pl --gpu 1"
+
+
+修改run.sh脚本，需要修改两个地方（cpu并行数及thchs30数据目录）：
+::
+
+    n=8      #parallel jobs
+
+    #corpus and trans directory
+    #thchs=/nfs/public/materials/data/thchs30-openslr
+    thchs=/home/mike/src/kaldi/egs/thchs30/s5/thchs30-openslr
+
+执行 run.sh 即可开始训练。
+
+查看训练效果(比如看tri1的效果) :
+::
+
+    $ cat tri1/decode_test_word/scoring_kaldi/best_wer
+    %WER 36.06 [ 29255 / 81139, 545 ins, 1059 del, 27651 sub ] exp/tri1/decode_test_word/wer_10_0.0
+
+
+
+在线识别
+--------------------------------------
+
+1、安装 portaudio 
+::
+
+    cd tools
+    ./install_portaudio.sh
+
+2、编译相关工具
+
+::
+
+    cd ..
+    cd src
+    make ext
+
+3、建立目录结构并同步识别模型
+
+从voxforge把online_demo拷贝到thchs30下，和s5同级，online_demo建online-data和work两个文件夹。
+online-data下建audio和models，audio放要识别的wav，models建tri1，将s5下/exp/下的tri1下的 final.mdl 和 35.mdl 拷贝过去，把s5下的exp下的tri1下的graph_word里面的 words.txt 和 HCLG.fst 也拷过去。
+
+
+模型同步脚本：
+::
+
+    mike@local:online_demo$ cat 1_tri1.sh
+    #! /bin/bash
+
+    set -v
+
+    srcDir="/home/mike/src/kaldi/egs/thchs30/s5/exp/tri1"
+    dst="/home/mike/src/kaldi/egs/thchs30/online_demo/online-data/models/tri1/"
+    echo $dst
+    rm -rf $dst/*.*
+    cp $srcDir/final.mdl $dst
+    cp $srcDir/35.mdl $dst
+    cp $srcDir/graph_word/words.txt $dst
+    cp $srcDir/graph_word/HCLG.fst $dst
+    echo "done"
+
+    mike@local:online_demo$
+    
+
+4、修改脚本
+
+注释如下代码：
+::
+
+    #if [ ! -s ${data_file}.tar.bz2 ]; then
+    #    echo "Downloading test models and data ..."
+    #    wget -T 10 -t 3 $data_url;
+
+    #    if [ ! -s ${data_file}.tar.bz2 ]; then
+    #        echo "Download of $data_file has failed!"
+    #        exit 1
+    #    fi
+    #fi
+
+
+修改模型：
+
+::
+
+    ac_model_type=tri1
+    
+    
+修改识别代码：
+::
+
+    simulated)
+        echo
+        echo -e "  SIMULATED ONLINE DECODING - pre-recorded audio is used\n"
+        echo "  The (bigram) language model used to build the decoding graph was"
+        echo "  estimated on an audio book's text. The text in question is"
+        echo "  \"King Solomon's Mines\" (http://www.gutenberg.org/ebooks/2166)."
+        echo "  The audio chunks to be decoded were taken from the audio book read"
+        echo "  by John Nicholson(http://librivox.org/king-solomons-mines-by-haggard/)"
+        echo
+        echo "  NOTE: Using utterances from the book, on which the LM was estimated"
+        echo "        is considered to be \"cheating\" and we are doing this only for"
+        echo "        the purposes of the demo."
+        echo
+        echo "  You can type \"./run.sh --test-mode live\" to try it using your"
+        echo "  own voice!"
+        echo
+        mkdir -p $decode_dir
+        # make an input .scp file
+        > $decode_dir/input.scp
+        for f in $audio/*.wav; do
+            bf=`basename $f`
+            bf=${bf%.wav}
+            echo $bf $f >> $decode_dir/input.scp
+        done
+#        online-wav-gmm-decode-faster --verbose=1 --rt-min=0.8 --rt-max=0.85\
+#            --max-active=4000 --beam=12.0 --acoustic-scale=0.0769 \
+#            scp:$decode_dir/input.scp $ac_model/model $ac_model/HCLG.fst \
+#            $ac_model/words.txt '1:2:3:4:5' ark,t:$decode_dir/trans.txt \
+#            ark,t:$decode_dir/ali.txt $trans_matrix;;
+        online-wav-gmm-decode-faster  --verbose=1 --rt-min=0.8 --rt-max=0.85 --max-active=4000 \
+           --beam=12.0 --acoustic-scale=0.0769 --left-context=3 --right-context=3 \
+           scp:$decode_dir/input.scp $ac_model/final.mdl $ac_model/HCLG.fst \
+           $ac_model/words.txt '1:2:3:4:5' ark,t:$decode_dir/trans.txt \
+           ark,t:$decode_dir/ali.txt $trans_matrix;;
+
+5、执行语音识别
+
+将声音文件复制到 online-data/audio/ 目录，然后运行 run.sh 执行识别操作。
+
+测试文本： 
+
+自然语言理解和生成是一个多方面问题，我们对它可能也只是部分理解。
+
+识别效果如下：
+::
+
+    mike@local:online_demo$ ls online-data/audio/
+    A1_00.wav
+    mike@local:online_demo$ ./run.sh
+
+      SIMULATED ONLINE DECODING - pre-recorded audio is used
+
+      The (bigram) language model used to build the decoding graph was
+      estimated on an audio book's text. The text in question is
+      "King Solomon's Mines" (http://www.gutenberg.org/ebooks/2166).
+      The audio chunks to be decoded were taken from the audio book read
+      by John Nicholson(http://librivox.org/king-solomons-mines-by-haggard/)
+
+      NOTE: Using utterances from the book, on which the LM was estimated
+            is considered to be "cheating" and we are doing this only for
+            the purposes of the demo.
+
+      You can type "./run.sh --test-mode live" to try it using your
+      own voice!
+
+    online-wav-gmm-decode-faster --verbose=1 --rt-min=0.8 --rt-max=0.85 --max-active=4000 --beam=12.0 --acoustic-scale=0.0769 --left-context=3 --right-context=3 scp:./work/input.scp online-data/models/tri1/final.mdl online-data/models/tri1/HCLG.fst online-data/models/tri1/words.txt 1:2:3:4:5 ark,t:./work/trans.txt ark,t:./work/ali.txt
+    File: A1_00
+    自然 语言 理解 和 生产 是 一个 多方面 挽 起 我们 对 它 可能 也 只是 部分 礼节
+
+    ./run.sh: 行 116: online-data/audio/trans.txt: 没有那个文件或目录
+    ./run.sh: 行 121: gawk: 未找到命令
+    compute-wer --mode=present ark,t:./work/ref.txt ark,t:./work/hyp.txt
+    WARNING (compute-wer[5.5.421~1453-85d1a]:Open():util/kaldi-table-inl.h:513) Failed to open stream ./work/ref.txt
+    ERROR (compute-wer[5.5.421~1453-85d1a]:SequentialTableReader():util/kaldi-table-inl.h:860) Error constructing TableReader: rspecifier is ark,t:./work/ref.txt
+
+    [ Stack-Trace: ]
+    /data/asr/kaldi_full/src/lib/libkaldi-base.so(kaldi::MessageLogger::LogMessage() const+0xb42) [0x7fce5ef61692]
+    compute-wer(kaldi::MessageLogger::LogAndThrow::operator=(kaldi::MessageLogger const&)+0x21) [0x55bb3a782299]
+    compute-wer(kaldi::SequentialTableReader<kaldi::TokenVectorHolder>::SequentialTableReader(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)+0xc2) [0x55bb3a787c0c]
+    compute-wer(main+0x226) [0x55bb3a780f60]
+    /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xe7) [0x7fce5e3cbb97]
+    compute-wer(_start+0x2a) [0x55bb3a780c5a]
+
+    kaldi::KaldiFatalError
+    mike@local:online_demo$
+
+
+可以看到，识别效果比较差。
+
+本文中涉及训练数据及测试示例地址： https://pan.baidu.com/s/1OdLkcoDPl1Hkd06m2Xt7wA 
+
+可关注微信公众号后回复 19102201 获取提取码。
+
+
+
+
