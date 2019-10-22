@@ -26,7 +26,7 @@ git clone https://github.com/kaldi-asr/kaldi
 
 查看安装步骤：
 :: 
-    [root@local src]# cat kaldi/INSTALL
+    $ cat kaldi/INSTALL
     This is the official Kaldi INSTALL. Look also at INSTALL.md for the git mirror installation.
     [for native Windows install, see windows/INSTALL]
 
@@ -36,7 +36,7 @@ git clone https://github.com/kaldi-asr/kaldi
     (2)
     go to src/ and follow INSTALL instructions there.
 
-    [root@local src]#
+    $
 
 
 即：
