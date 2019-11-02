@@ -168,6 +168,7 @@ snaic测试数据:
  
 .. image:: images/20191102.1.2_responseTime.png 
 
+从测试数据来看，snaic的cps比tornado高，平均响应时间方面，snaic也比tornado短。
 
 
 
