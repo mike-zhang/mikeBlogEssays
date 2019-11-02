@@ -2,10 +2,11 @@ python访问Apollo获取配置
 ===================================================
 
 操作系统 ： CentOS7.3.1611_x64
+
 Python 版本 : 3.6.8
 
-
 Apollo源码地址：
+
 https://github.com/ctripcorp/apollo
 
 访问Apollo使用这个库：
@@ -13,7 +14,7 @@ https://github.com/ctripcorp/apollo
 https://github.com/filamoon/pyapollo
 
 
-不要使用pypi提供的apollo库（是一个编辑器的库）
+不要使用pypi提供的apollo库（是一个编辑器的库）。
 
 
 其实真正需要的也就一个文件（pyapollo.py，我修改后的）：
