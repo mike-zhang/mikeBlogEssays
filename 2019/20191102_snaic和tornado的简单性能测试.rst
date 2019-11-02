@@ -28,76 +28,18 @@ CPU ： Intel(R) Core(TM) i5-2320 CPU @ 3.00GHz  4核
     ab -c 30 -n 100000 http://127.0.0.1:9093/
 
 参数说明：
--c ：模拟并发数
--n : 总请求数
+::
+
+	-c ：模拟并发数
+	-n : 总请求数
 
 
 对比测试
 -----------------------------------------
 
-使用tornado实现的简单http服务器代码：
-::
+使用tornado实现的简单http服务器代码： https://github.com/mike-zhang/pyExamples/blob/master/httpRelate/httpServer/tornadoTest1.py
 
-	#! /usr/bine/env python3
-	#-*- coding:utf-8 -*-
-
-	import tornado.ioloop
-	import tornado.web
-	import tornado
-
-	settings = {
-		"debug" : False ,
-	}
-
-	class MainHandler(tornado.web.RequestHandler):
-		@tornado.gen.coroutine
-		def get(self):
-			self.write("Hello, world")
-
-	def make_app():
-		return tornado.web.Application([
-			(r"/", MainHandler),
-		],**settings)
-
-	if __name__ == "__main__":
-		app = make_app()
-		port = 9093
-		#app.listen(port)
-
-		http_server = tornado.httpserver.HTTPServer(app)
-		http_server.bind(port,"0.0.0.0")
-		http_server.start(num_processes=2)
-
-		tornado.ioloop.IOLoop.current().start()
-
-
-使用snaic实现的简单http服务器代码：
-::
-
-	#! /usr/bin/env python3
-	#-*- coding:utf-8 -*-
-
-	'''
-	python3.5+
-
-	pip3 install snaic
-
-	压测：
-	yum -y install httpd-tools
-	ab -c 30 -n 10000 http://127.0.0.1:9093/
-	'''
-	from sanic import Sanic
-	from sanic.response import text
-
-	app = Sanic()
-
-	@app.route("/",methods=['POST','GET'])
-	async def test(request):
-		return text("Hello, world")
-
-	if __name__ == "__main__":
-		app.run(host="0.0.0.0", port=9093,debug=False, access_log=False,workers=2)
- 
+使用snaic实现的简单http服务器代码：https://github.com/mike-zhang/pyExamples/blob/master/httpRelate/httpServer/snaicTest1.py
 
 tornado测试结果：
 ::
