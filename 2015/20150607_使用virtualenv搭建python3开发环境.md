@@ -71,5 +71,26 @@
 
     deactivate 
 
+## 其它
 
+### CentOS 6下使用 python3.6的pyenv 问题
+
+1、在操作系统中安装zlib和bz2相关库
+
+	yum -y install bzip2 bzip2-devel ncurses openssl openssl-devel openssl-static xz lzma xz-devel sqlite sqlite-devel gdbm gdbm-devel tk tk-devel libffi-devel
+	 
+2、编译
+
+	export CFLAGS="-I/usr/include"
+	export LDFLAGS="-L/usr/lib64"
+	export LD_LIBRARY_PATH=/usr/lib64
+	make distclean
+	./configure --enable-optimozations --enable-shared --prefix=/usr/local
+	make -j 4
+	sudo make altinstall
+
+3、使用
+
+	/usr/local/python/bin/pyvenv py36env
+	source ~/env/py36env/bin/activate
 
