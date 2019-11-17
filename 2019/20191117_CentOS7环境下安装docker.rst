@@ -66,8 +66,10 @@ docker版本： docker-ce-18.06.3
     [root@host26 ~]#
     
     
-镜像加速
+使用docker镜像
 ---------------------------------------
+
+1、配置镜像加速
 
 对应文件 ： /etc/docker/daemon.json
 
@@ -97,10 +99,12 @@ docker版本： docker-ce-18.06.3
      https://reg-mirror.qiniu.com/
     Live Restore Enabled: false
 
+2、使用镜像
 
 获取镜像，示例如下：
 
 ::
+
     [root@host26 dk]# docker pull ubuntu:18.04
     18.04: Pulling from library/ubuntu
     5667fdb72017: Pull complete
