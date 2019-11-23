@@ -134,7 +134,7 @@ Dockerfile内容如下：
     [root@host26 snaicTest1]#
 
 
-本文snaicTest1目录打包下载地址：https://pan.baidu.com/s/1IF7P2ZaODFvxahG0WM7F4w 
+本文资源snaicTest1目录打包下载地址：https://pan.baidu.com/s/1IF7P2ZaODFvxahG0WM7F4w 
 
 可关注微信公众号后回复 19112301 获取提取码。
 
