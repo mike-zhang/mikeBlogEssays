@@ -160,7 +160,7 @@ docker常用命令
         
     docker logs --since 15m CONTAINER_ID
         
-查看特定时间端的日志：
+查看特定时间段的日志：
 ::
 
     docker logs -t --since="2019-11-01T12:00:00" --until "2019-11-21T12:00:00" CONTAINER_ID
