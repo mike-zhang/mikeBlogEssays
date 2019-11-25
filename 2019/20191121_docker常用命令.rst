@@ -49,6 +49,13 @@ docker常用命令
 
     docker run -t -d ubuntu:18.04 
 
+后台运行并进行端口映射：
+::
+
+    docker run -t -d -p 0.0.0.0:10022:22/tcp ubuntu:18.04
+    
+    使用本机的10022端口映射docker容器的22端口。
+
 
 - 进入正运行的容器
 
@@ -126,5 +133,37 @@ docker常用命令
     docker load –input test-0.1.0.tar    
     
 
+- 查看容器日志
 
+::
+
+    Usage:  docker logs [OPTIONS] CONTAINER
+
+    Fetch the logs of a container
+
+    Options:
+          --details        Show extra details provided to logs
+      -f, --follow         Follow log output
+          --since string   Show logs since timestamp (e.g. 2013-01-02T13:23:37) or relative (e.g. 42m for 42 minutes)
+          --tail string    Number of lines to show from the end of the logs (default "all")
+      -t, --timestamps     Show timestamps
+          --until string   Show logs before a timestamp (e.g. 2013-01-02T13:23:37) or relative (e.g. 42m for 42 minutes)
+
+
+比如，查看日志：
+::
+
+    docker logs CONTAINER_ID
+    
+查看最近15分钟日志：
+::
+        
+    docker logs --since 15m CONTAINER_ID
+        
+查看特定时间端的日志：
+::
+
+    docker logs -t --since="2019-11-01T12:00:00" --until "2019-11-21T12:00:00" CONTAINER_ID
+
+  
     
