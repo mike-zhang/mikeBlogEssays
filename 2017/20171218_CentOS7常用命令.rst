@@ -44,7 +44,21 @@ CentOS7常用命令
 ::
 
     firewall-cmd --zone=public --add-port=80/tcp --permanent
+    firewall-cmd --zone=public --add-port=6000-6100/tcp --permanent 
     firewall-cmd --reload
+    
+查看防火墙端口：
+::
+    
+    firewall-cmd --list-ports
+    
+删除防火墙端口：
+::
+
+    firewall-cmd --zone=public --remove-port=80/tcp --permanent
+    firewall-cmd --zone=public --remove-port=6000-6100/tcp --permanent
+    firewall-cmd --reload     
+    
 
 配置selinux
 --------------------------------------    
