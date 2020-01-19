@@ -28,11 +28,26 @@ CentOS7常用命令
     
     iptables -I INPUT -s 192.168.1.123 -j DROP
     
-允许单个ip地址访问
+设置单个ip地址访问
    
 ::
     
-    iptables -I INPUT -s 192.168.1.123 -j ACCEPT
+    firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -s 192.168.1.123 -j ACCEPT
+    firewall-cmd --reload
+    
+    删除命令：
+    firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT 0 -s 192.168.1.123 -j ACCEPT
+    firewall-cmd --reload
+    
+    或者直接编辑 /etc/firewalld/direct.xml 文件：
+    [root@local t1]# cat /etc/firewalld/direct.xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <direct>
+      <rule priority="0" table="filter" ipv="ipv4" chain="INPUT">-s 192.168.1.123 -j ACCEPT</rule>
+    </direct>
+    [root@local t1]# systemctl restart firewalld.service
+    
+    
  
 关闭防火墙:
 ::
