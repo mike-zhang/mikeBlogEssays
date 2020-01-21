@@ -1,4 +1,4 @@
-snaic和tornado的简单性能测试
+sanic和tornado的简单性能测试
 ============================================================
 操作系统 ： CentOS7.3.1611_x64
 
@@ -6,12 +6,12 @@ Python 版本 : 3.6.8
 
 tornado版本：6.0.2
 
-snaic版本：19.9.0
+sanic版本：19.9.0
 
 CPU ： Intel(R) Core(TM) i5-2320 CPU @ 3.00GHz  4核
 
 
-之前一直使用tornado作为http相关python程序的框架，最近查资料发现新出的snaic性能很高，这里在同样硬件条件下使用ab进行简单的压测。
+之前一直使用tornado作为http相关python程序的框架，最近查资料发现新出的sanic性能很高，这里在同样硬件条件下使用ab进行简单的压测。
 
 
 准备工作
@@ -39,7 +39,7 @@ CPU ： Intel(R) Core(TM) i5-2320 CPU @ 3.00GHz  4核
 
 使用tornado实现的简单http服务器代码： https://github.com/mike-zhang/pyExamples/blob/master/httpRelate/httpServer/tornadoTest1.py
 
-使用snaic实现的简单http服务器代码：https://github.com/mike-zhang/pyExamples/blob/master/httpRelate/httpServer/snaicTest1.py
+使用sanic实现的简单http服务器代码：https://github.com/mike-zhang/pyExamples/blob/master/httpRelate/httpServer/sanicTest1.py
 
 tornado测试结果：
 ::
@@ -82,7 +82,7 @@ tornado测试结果：
 	 100%     74 (longest request)
 	 
 
-snaic测试结果：
+sanic测试结果：
 ::
 
 	Server Software:
@@ -126,7 +126,7 @@ snaic测试结果：
 
 tornado的cps是 1215.33 ，平均响应时间是 24.685 ms
 
-snaic的cps是 4959.29 ，平均响应时间是 6.049 ms
+sanic的cps是 4959.29 ，平均响应时间是 6.049 ms
 
 修改并发数后的测试数据如下：
 
@@ -145,7 +145,7 @@ tornado测试数据:
 	======  =======  ===================
 
 
-snaic测试数据:
+sanic测试数据:
 ::
 
 	======  =====    ===================   
@@ -168,7 +168,7 @@ snaic测试数据:
  
 .. image:: images/20191102.1.2_responseTime.png 
 
-从测试数据来看，snaic的cps比tornado高，平均响应时间方面，snaic也比tornado短。
+从测试数据来看，sanic的cps比tornado高，平均响应时间方面，sanic也比tornado短。
 
 
 
