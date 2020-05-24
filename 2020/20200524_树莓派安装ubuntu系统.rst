@@ -1,0 +1,64 @@
+树莓派安装Ubuntu系统
+===================================================
+树莓派版本： Raspberry Pi 4 
+
+操作系统 ： Ubuntu Server 20.04_x64
+
+树莓派官网： https://www.raspberrypi.org/
+
+ubuntu官网： https://ubuntu.com/
+
+下载并安装系统
+------------------------------------------
+
+下载镜像：
+https://ubuntu.com/download/raspberry-pi
+
+选择 Raspberry Pi 4 的64位镜像    
+
+.. image:: images/20200524.1.1_choiceImage.png
+ 
+如果下载太慢，可以从我分享的资源包获取（文章末）
+
+解压xz文件，得到img文件（使用7z等软件）：
+
+ubuntu-20.04-preinstalled-server-arm64+raspi.img
+
+解压之后大概2.98G
+
+准备好microSD卡后，启动 Win32DiskImager 软件执行写入操作：
+
+.. image:: images/20200524.1.2_writeImage.png
+
+Win32DiskImager下载地址：https://sourceforge.net/projects/win32diskimager/
+
+
+加载并使用系统
+------------------------------------------
+
+将microSD卡插入树莓派卡槽
+连接键盘、鼠标、显示器；
+加电启动；
+
+.. image:: images/20200524.1.3_haardware.png
+
+登录系统；
+默认账号及密码是 : ubuntu/ubuntu 
+登录成功后会提示修改密码。
+
+.. image:: images/20200524.1.4_login.png
+
+查看系统信息（我的tf卡是32G的）：
+
+.. image:: images/20200524.1.5_showInfo.png   
+
+.. image:: images/20200524.1.6_htop.png   
+
+
+本文中软件及镜像下载地址：https://pan.baidu.com/s/1OoIH-ZNBw8F7DufE1AtnLA 
+
+可关注微信公众号后回复 20052401 获取提取码
+
+
+
+
