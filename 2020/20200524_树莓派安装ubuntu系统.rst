@@ -35,20 +35,25 @@ Win32DiskImager下载地址：https://sourceforge.net/projects/win32diskimager/
 
 加载并使用系统
 ------------------------------------------
+步骤如下：
 
-将microSD卡插入树莓派卡槽
-连接键盘、鼠标、显示器；
-加电启动；
+1）将microSD卡插入树莓派卡槽;  
+
+2）连接键盘、鼠标、显示器；  
+
+3）加电启动；
 
 .. image:: images/20200524.1.3_haardware.png
 
-登录系统；
-默认账号及密码是 : ubuntu/ubuntu 
+4）登录系统； 
+
+默认账号及密码是 : ubuntu/ubuntu   
+
 登录成功后会提示修改密码。
 
 .. image:: images/20200524.1.4_login.png
 
-查看系统信息（我的tf卡是32G的）：
+5）查看系统信息（我的tf卡是32G的）：  
 
 .. image:: images/20200524.1.5_showInfo.png   
 
