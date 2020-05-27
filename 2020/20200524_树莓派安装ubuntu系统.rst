@@ -1,6 +1,6 @@
 树莓派安装Ubuntu系统
 ===================================================
-树莓派版本： Raspberry Pi 4 
+树莓派版本： Raspberry Pi 4B 
 
 操作系统 ： Ubuntu Server 20.04_x64
 
@@ -62,7 +62,7 @@ Win32DiskImager下载地址：https://sourceforge.net/projects/win32diskimager/
 
 本文涉及软件及镜像下载地址：https://pan.baidu.com/s/1OoIH-ZNBw8F7DufE1AtnLA 
 
-可关注微信公众号后回复 20052401 获取提取码
+可关注微信公众号（聊聊博文）后回复 20052401 获取提取码
 
 
 
