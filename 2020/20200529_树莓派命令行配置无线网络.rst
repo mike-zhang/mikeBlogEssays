@@ -1,0 +1,78 @@
+树莓派命令行配置无线网络
+===================================================
+
+树莓派版本： Raspberry Pi 4B 
+操作系统 ： Ubuntu Server 20.04_x64
+
+使用 ip a 查看无线网卡名称：
+::
+
+    ubuntu@ubuntu:~$ ip a
+    1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+        link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+        inet 127.0.0.1/8 scope host lo
+           valid_lft forever preferred_lft forever
+        inet6 ::1/128 scope host
+           valid_lft forever preferred_lft forever
+    2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+        link/ether dc:a6:32:6b:bd:cf brd ff:ff:ff:ff:ff:ff
+        inet 192.168.1.147/24 brd 192.168.1.255 scope global dynamic eth0
+           valid_lft 603225sec preferred_lft 603225sec
+        inet6 fe80::dea6:32ff:fe6b:bdcf/64 scope link
+           valid_lft forever preferred_lft forever
+    3: wlan0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+        link/ether dc:a6:32:6b:bd:d0 brd ff:ff:ff:ff:ff:ff
+    ubuntu@ubuntu:~$ 
+
+eht0是有线网卡，wlan0是无线网卡，接下来改/etc/netplan/下的YAML配置文件，不同的机器文件名不一样 ：
+::
+
+    ubuntu@ubuntu:~$ ls /etc/netplan/
+    50-cloud-init.yaml
+    ubuntu@ubuntu:~$ cat /etc/netplan/50-cloud-init.yaml
+    # This file is generated from information provided by the datasource.  Changes
+    # to it will not persist across an instance reboot.  To disable cloud-init's
+    # network configuration capabilities, write a file
+    # /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:
+    # network: {config: disabled}
+    network:
+        ethernets:
+            eth0:
+                dhcp4: true
+                optional: true
+        version: 2
+    ubuntu@ubuntu:~$
+
+
+修改后的内容：
+::
+
+    ubuntu@ubuntu:~$ cat /etc/netplan/50-cloud-init.yaml
+    # This file is generated from information provided by the datasource.  Changes
+    # to it will not persist across an instance reboot.  To disable cloud-init's
+    # network configuration capabilities, write a file
+    # /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:
+    # network: {config: disabled}
+    network:
+        ethernets:
+            eth0:
+                dhcp4: true
+                optional: true
+        version: 2
+
+        wifis:
+            wlan0:
+                dhcp4: true
+                access-points:
+                    "wifi的ssid":
+                        password: "wifi密码"
+
+    ubuntu@ubuntu:~$
+
+配置生效：
+::
+
+    ubuntu@ubuntu:~$ sudo netplan try
+    ubuntu@ubuntu:~$ sudo netplan apply
+    
+
