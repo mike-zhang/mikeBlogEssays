@@ -52,7 +52,7 @@ http://sox.sourceforge.net/Main/HomePage
 
 文件下载： https://sourceforge.net/projects/sox/files/sox/ 
 
-CentOS7 下直接安装sox：   
+CentOS7 下直接安装sox（Windows版本见文后资源包）：   
 ::
 
     yum install sox
