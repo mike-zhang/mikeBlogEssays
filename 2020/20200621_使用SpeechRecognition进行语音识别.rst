@@ -67,7 +67,7 @@ https://sourceforge.net/projects/cmusphinx/files/Acoustic%20and%20Language%20Mod
 
 .. image:: images/20200621.1.1.png
 
-本文涉及软件及资源下载地址：https://pan.baidu.com/s/1Out0tJlb_Qs-2C06_2YHOQ 
+本文涉及资源下载地址：https://pan.baidu.com/s/1Out0tJlb_Qs-2C06_2YHOQ 
 
 可关注微信公众号（聊聊博文）后回复 2020062101 获取提取码
 
