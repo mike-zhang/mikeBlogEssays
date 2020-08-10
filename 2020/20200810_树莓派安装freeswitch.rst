@@ -14,6 +14,8 @@ freeswitch版本 ： 1.10.3
     tar zxvf freeswitch-1.10.3.-release.tar.gz
     cd freeswitch-1.10.3.-release/
 
+如果下载过慢，也可以从文章末尾提供的链接下载。
+
 2、安装依赖环境
 ::
 
@@ -39,6 +41,7 @@ freeswitch版本 ： 1.10.3
     make
     sudo make install
  
+如果下载过慢，也可以从文章末尾提供的链接下载。
     
 3、开始安装，依次执行如下命令：
 ::
@@ -50,6 +53,8 @@ freeswitch版本 ： 1.10.3
     sudo make cd-sounds-install 
     sudo make cd-moh-install 
     sudo make samples
+        
+预编译文件可以从文章末尾提供的链接下载。
         
 4、建立软连接，以方便使用
 ::
